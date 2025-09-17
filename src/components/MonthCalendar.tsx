@@ -22,6 +22,7 @@ interface MonthCalendarProps {
   onMouseUp?: () => void;
   isInDragRange?: (month: number, year: number, day: number) => boolean;
   isDragging?: boolean;
+  dateFilter?: string;
 }
 
 export const MonthCalendar = ({ 
@@ -36,7 +37,8 @@ export const MonthCalendar = ({
   onMouseMove,
   onMouseUp,
   isInDragRange,
-  isDragging
+  isDragging,
+  dateFilter = "all-dates"
 }: MonthCalendarProps) => {
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -79,7 +81,17 @@ export const MonthCalendar = ({
     if (available > 0) return 'bookable';
     if (available <= 0) return 'sold-out';
     
-    return 'available';
+  return 'available';
+};
+
+  const shouldHighlightDate = (date: Date) => {
+    const status = getDateAvailabilityStatus(date);
+    
+    if (dateFilter === "all-dates") return true;
+    if (dateFilter === "bookable-dates") return status === 'bookable';
+    if (dateFilter === "sold-out-dates") return status === 'sold-out' || status === 'closed';
+    
+    return true;
   };
 
   // Get first day of month and number of days
@@ -144,9 +156,10 @@ export const MonthCalendar = ({
                 className={cn(
                   "h-6 flex items-center justify-center text-[10px] cursor-pointer hover:bg-muted/50 transition-colors",
                   date && isToday(date) && "bg-accent text-accent-foreground font-bold",
-                  date && getDateAvailabilityStatus(date) === 'closed' && "bg-red-200 text-red-900",
-                  date && getDateAvailabilityStatus(date) === 'bookable' && "bg-green-200 text-green-900",
-                  date && getDateAvailabilityStatus(date) === 'sold-out' && "bg-red-200 text-red-900",
+                  date && shouldHighlightDate(date) && getDateAvailabilityStatus(date) === 'closed' && "bg-red-200 text-red-900",
+                  date && shouldHighlightDate(date) && getDateAvailabilityStatus(date) === 'bookable' && "bg-green-200 text-green-900",
+                  date && shouldHighlightDate(date) && getDateAvailabilityStatus(date) === 'sold-out' && "bg-red-200 text-red-900",
+                  date && !shouldHighlightDate(date) && "bg-white text-muted-foreground",
                   date && isInDragRange && isInDragRange(month, year, date.getDate()) && "bg-blue-200",
                   !date && "cursor-default bg-muted/10"
                 )}

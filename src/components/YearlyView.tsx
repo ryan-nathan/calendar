@@ -163,6 +163,7 @@ export const YearlyView = ({
             onMouseUp={handleMouseUp}
             isInDragRange={isInDragRange}
             isDragging={isDragging}
+            dateFilter={dateFilter}
           />
         ))}
       </div>
