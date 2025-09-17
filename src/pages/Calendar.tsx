@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 const BASE_DATA_DATE = new Date(2025, 8, 16); // Sept 16, 2025
 
 // Sample data - in real app this would come from API
-const roomTypes = [
+const initialRoomTypes = [
   {
     id: "superior",
     name: "Superior Room",
@@ -54,6 +54,7 @@ const getDataIndexForDate = (date: Date): number => {
 };
 
 const Calendar = () => {
+  const [roomTypes, setRoomTypes] = useState(initialRoomTypes);
   const [currentStartDate, setCurrentStartDate] = useState(new Date(2025, 8, 16)); // Sept 16, 2025
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
@@ -62,6 +63,9 @@ const Calendar = () => {
   const [dragStart, setDragStart] = useState<number | null>(null);
   const [dragEnd, setDragEnd] = useState<number | null>(null);
   const [currentDragRoomType, setCurrentDragRoomType] = useState<string | null>(null);
+  const [editingCell, setEditingCell] = useState<{roomTypeId: string, dateIndex: number, field: 'roomsToSell' | 'rates'} | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const [bulkEditData, setBulkEditData] = useState({
     fromDate: "2025-09-16",
     toDate: "2025-10-16",
@@ -270,6 +274,60 @@ const Calendar = () => {
     const endIndex = Math.max(dragStart, dragEnd);
     return dateIndex >= startIndex && dateIndex <= endIndex;
   };
+
+  const handleCellClick = (roomTypeId: string, dateIndex: number, field: 'roomsToSell' | 'rates') => {
+    const roomType = roomTypes.find(rt => rt.id === roomTypeId);
+    if (!roomType) return;
+    
+    const dataIndex = getDataIndexForDate(calendarDates[dateIndex]);
+    const currentValue = roomType.data[field][dataIndex];
+    
+    setEditingCell({ roomTypeId, dateIndex, field });
+    setEditValue(currentValue.toString());
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingCell) return;
+    
+    const { roomTypeId, dateIndex, field } = editingCell;
+    const dataIndex = getDataIndexForDate(calendarDates[dateIndex]);
+    const numValue = parseInt(editValue);
+    
+    if (isNaN(numValue) || numValue < 0) return;
+    
+    setRoomTypes(prev => prev.map(roomType => {
+      if (roomType.id === roomTypeId) {
+        const newData = { ...roomType.data };
+        newData[field] = [...newData[field]];
+        newData[field][dataIndex] = numValue;
+        return { ...roomType, data: newData };
+      }
+      return roomType;
+    }));
+    
+    setEditingCell(null);
+    setEditValue("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCell(null);
+    setEditValue("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
+
+  useEffect(() => {
+    if (editingCell && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingCell]);
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -670,12 +728,29 @@ const Calendar = () => {
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
+                        const isEditing = editingCell?.roomTypeId === roomType.id && editingCell?.dateIndex === index && editingCell?.field === 'roomsToSell';
+                        
                         return (
                           <div key={`${roomType.id}-rooms-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer",
                             isClosed && "bg-red-200"
                           )}>
-                            {roomType.data.roomsToSell[dataIndex]}
+                            {isEditing ? (
+                              <Input
+                                ref={inputRef}
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onBlur={handleSaveEdit}
+                                onKeyDown={handleKeyDown}
+                                className="w-full h-8 text-center text-sm p-1 border-0 bg-white shadow-sm"
+                                type="number"
+                                min="0"
+                              />
+                            ) : (
+                              <span onClick={() => handleCellClick(roomType.id, index, 'roomsToSell')}>
+                                {roomType.data.roomsToSell[dataIndex]}
+                              </span>
+                            )}
                           </div>
                         );
                       })}
@@ -721,13 +796,30 @@ const Calendar = () => {
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
+                        const isEditing = editingCell?.roomTypeId === roomType.id && editingCell?.dateIndex === index && editingCell?.field === 'rates';
+                        
                         return (
                           <div key={`${roomType.id}-rate-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer",
                             isClosed && "bg-red-200"
                           )}>
-                            <span className="text-[10px] text-muted-foreground">THB</span>
-                            <span className="text-xs font-medium">{roomType.data.rates[dataIndex]}</span>
+                            {isEditing ? (
+                              <Input
+                                ref={inputRef}
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onBlur={handleSaveEdit}
+                                onKeyDown={handleKeyDown}
+                                className="w-full h-8 text-center text-xs p-1 border-0 bg-white shadow-sm"
+                                type="number"
+                                min="0"
+                              />
+                            ) : (
+                              <div onClick={() => handleCellClick(roomType.id, index, 'rates')}>
+                                <span className="text-[10px] text-muted-foreground">THB</span>
+                                <span className="text-xs font-medium block">{roomType.data.rates[dataIndex]}</span>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
