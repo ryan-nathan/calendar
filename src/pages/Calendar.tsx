@@ -386,6 +386,8 @@ const Calendar = () => {
   };
 
   const handleBulkEditSave = () => {
+    console.log('handleBulkEditSave called', { bulkEditSelection, bulkEditData });
+    
     // For comprehensive bulk edit (with form inputs), use form dates
     // For simple bulk edit (drag selection), use selection dates
     let fromDate: Date, toDate: Date;
@@ -394,10 +396,12 @@ const Calendar = () => {
       // Simple bulk edit from drag selection
       fromDate = bulkEditSelection.startDate;
       toDate = bulkEditSelection.endDate;
+      console.log('Using drag selection dates:', fromDate, toDate);
     } else {
       // Comprehensive bulk edit with form inputs
       fromDate = new Date(bulkEditData.fromDate);
       toDate = new Date(bulkEditData.toDate);
+      console.log('Using form dates:', fromDate, toDate);
     }
     
     // Find all calendar dates within the specified range
@@ -405,11 +409,21 @@ const Calendar = () => {
       return date >= fromDate && date <= toDate;
     });
     
-    if (affectedDates.length === 0) return;
+    console.log('Affected dates:', affectedDates.length);
+    
+    if (affectedDates.length === 0) {
+      console.log('No affected dates found, returning early');
+      return;
+    }
     
     // Get the room type to modify
     const roomTypeId = bulkEditSelection.roomTypeId || selectedRoomType;
-    if (!roomTypeId) return;
+    if (!roomTypeId) {
+      console.log('No room type selected, returning early');
+      return;
+    }
+    
+    console.log('Processing room type:', roomTypeId);
     
     // Apply bulk changes to rooms and rates
     setRoomTypes(prev => prev.map(roomType => {
@@ -425,6 +439,7 @@ const Calendar = () => {
             if (!isNaN(roomsToSell) && roomsToSell >= 0) {
               newData.roomsToSell = [...newData.roomsToSell];
               newData.roomsToSell[dataIndex] = roomsToSell;
+              console.log(`Updated rooms to sell for date ${date.toDateString()}: ${roomsToSell}`);
             }
           }
           
@@ -434,6 +449,7 @@ const Calendar = () => {
             if (!isNaN(price) && price >= 0) {
               newData.rates = [...newData.rates];
               newData.rates[dataIndex] = price;
+              console.log(`Updated price for date ${date.toDateString()}: ${price}`);
             }
           }
         });
@@ -445,6 +461,8 @@ const Calendar = () => {
     
     // Apply room status changes to dates within range
     const shouldClose = bulkEditData.roomStatus === 'close';
+    console.log('Room status change:', shouldClose ? 'close' : 'open');
+    
     setClosedDates(prev => {
       const newClosedDates = { ...prev };
       if (!newClosedDates[roomTypeId]) {
@@ -454,10 +472,13 @@ const Calendar = () => {
       affectedDates.forEach(date => {
         const dateKey = getDateKey(date);
         newClosedDates[roomTypeId][dateKey] = shouldClose;
+        console.log(`Updated status for ${dateKey}: ${shouldClose ? 'closed' : 'open'}`);
       });
       
       return newClosedDates;
     });
+    
+    console.log('Save completed, closing dialogs');
     
     // Close dialogs and reset
     setBulkEditOpen(false);
@@ -1180,7 +1201,19 @@ const Calendar = () => {
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4">
-              <Button onClick={handleBulkEditSave} className="flex-1">
+              <Button 
+                onClick={() => {
+                  console.log('Simple bulk edit save clicked', {
+                    bulkEditSelection,
+                    bulkEditData,
+                    roomStatus: bulkEditData.roomStatus,
+                    roomsToSell: bulkEditData.roomsToSell,
+                    price: bulkEditData.price
+                  });
+                  handleBulkEditSave();
+                }} 
+                className="flex-1"
+              >
                 Save
               </Button>
               <Button 
