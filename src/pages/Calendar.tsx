@@ -531,10 +531,8 @@ const Calendar = () => {
                             key={`segment-${segmentIndex}`}
                             className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3"
                             style={{
-                              left: `${leftPercent}%`,
-                              width: `${widthPercent}%`,
-                              marginLeft: '8px',
-                              marginRight: '8px'
+                              left: `calc(${leftPercent}% + 8px)`,
+                              width: `calc(${widthPercent}% - 16px)`,
                             }}
                           >
                             {segmentIndex === 0 && <span className="text-sm font-medium">Bookable</span>}
