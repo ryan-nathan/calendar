@@ -1133,7 +1133,7 @@ const Calendar = () => {
 
       {/* Sync Info Dialog */}
       <Dialog open={syncInfoDialogOpen} onOpenChange={setSyncInfoDialogOpen}>
-        <DialogContent className="sm:max-w-[458px]">
+        <DialogContent className="sm:max-w-[478px]">
           <DialogHeader>
             <DialogTitle>Sync Information</DialogTitle>
           </DialogHeader>
