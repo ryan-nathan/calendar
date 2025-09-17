@@ -1399,10 +1399,8 @@ const Calendar = () => {
                           <div 
                             key={`${roomType.id}-status-${index}`} 
                             className={cn(
-                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative transition-colors duration-200",
+                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
                               inDragRange && "bg-blue-200",
-                              !isDragging && isClosed && "hover:bg-red-300",
-                              !isDragging && !isClosed && "hover:bg-green-300",
                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                             )}
                             onMouseDown={() => handleMouseDown(roomType.id, index, 'status')}
@@ -1410,6 +1408,13 @@ const Calendar = () => {
                             onMouseUp={handleMouseUp}
                             onMouseEnter={() => handleMouseMove(index)}
                           >
+                            {/* Individual cell hover overlay */}
+                            <div 
+                              className={cn(
+                                "absolute inset-0 transition-colors duration-200",
+                                isClosed ? "hover:bg-red-400" : "hover:bg-green-400"
+                              )}
+                            />
                           </div>
                         );
                       })}
