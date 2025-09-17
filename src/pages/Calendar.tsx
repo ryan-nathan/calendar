@@ -336,14 +336,7 @@ const Calendar = () => {
           <div className="grid grid-cols-[200px_1fr] mb-4">
             <div></div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handlePreviousWeek}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleNextWeek}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+              <div></div>
               <div className="flex gap-8">
                 {calendarDates.slice(0, 15).some((date, index) => index === 0 || date.getMonth() !== calendarDates[index - 1]?.getMonth()) && (
                   <h2 className="text-xl font-semibold">
@@ -356,7 +349,14 @@ const Calendar = () => {
                   </h2>
                 )}
               </div>
-              <div></div>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={handlePreviousWeek}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleNextWeek}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
