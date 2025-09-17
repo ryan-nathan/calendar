@@ -68,30 +68,30 @@ export const MonthCalendar = ({
   };
 
   return (
-    <div className="bg-white border border-border rounded-lg p-4">
+    <div className="bg-white border border-border rounded-lg p-2">
       {/* Month Header */}
-      <h3 className="text-lg font-semibold text-primary mb-4 text-center">
+      <h3 className="text-sm font-semibold text-primary mb-2 text-center">
         {monthNames[month]} {year}
       </h3>
 
       {/* Days of Week Header */}
-      <div className="grid grid-cols-7 gap-1 mb-2">
+      <div className="grid grid-cols-7 gap-px mb-1">
         {dayNames.map(day => (
-          <div key={day} className="text-center text-xs font-medium text-muted-foreground p-1">
+          <div key={day} className="text-center text-[10px] font-medium text-muted-foreground py-1">
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar Grid */}
-      <div className="space-y-1">
+      <div className="space-y-px">
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 gap-1">
+          <div key={weekIndex} className="grid grid-cols-7 gap-px">
             {week.map((date, dayIndex) => (
               <div
                 key={dayIndex}
                 className={cn(
-                  "aspect-square flex items-center justify-center text-sm border border-transparent rounded cursor-pointer hover:border-border transition-colors",
+                  "w-6 h-6 flex items-center justify-center text-[10px] border border-transparent cursor-pointer hover:border-border transition-colors",
                   date && "hover:bg-muted/50",
                   date && isToday(date) && "bg-accent text-accent-foreground font-semibold",
                   date && isDateClosed(date) && "bg-red-100 text-red-800",

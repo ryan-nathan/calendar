@@ -44,15 +44,15 @@ export const YearlyView = ({
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Year Controls */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button variant="ghost" size="sm" onClick={handlePreviousYear}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <h2 className="text-xl font-semibold min-w-[80px] text-center">
+            <h2 className="text-lg font-semibold min-w-[80px] text-center">
               {currentYear}
             </h2>
             <Button variant="ghost" size="sm" onClick={handleNextYear}>
@@ -78,7 +78,7 @@ export const YearlyView = ({
       </div>
 
       {/* Calendar Grid - 4 months per row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {months.map(({ month, year }) => (
           <MonthCalendar
             key={`${year}-${month}`}
@@ -92,17 +92,17 @@ export const YearlyView = ({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-6 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-accent rounded border"></div>
+      <div className="flex items-center gap-4 text-xs">
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-accent rounded border"></div>
           <span>Today</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-100 border border-red-200 rounded"></div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-red-100 border border-red-200 rounded"></div>
           <span>Closed</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-white border rounded"></div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-white border rounded"></div>
           <span>Available</span>
         </div>
       </div>
