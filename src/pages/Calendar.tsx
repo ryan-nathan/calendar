@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import { DateRange } from "react-day-picker";
+import { YearlyView } from "@/components/YearlyView";
 
 // Base date for data arrays (today's date)
 const BASE_DATA_DATE = new Date();
@@ -85,6 +86,8 @@ const Calendar = () => {
     endDate: null,
     roomTypeId: null
   });
+  const [currentView, setCurrentView] = useState<"list-view" | "calendar-view" | "yearly-view">("list-view");
+  const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("all-rooms");
 
   // Generate calendar dates from current start date (31 days total)
   const generateCalendarDates = () => {
@@ -440,7 +443,7 @@ const Calendar = () => {
           {/* Controls */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <Select defaultValue="all-rooms">
+              <Select value={selectedRoomTypeFilter} onValueChange={setSelectedRoomTypeFilter}>
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="All rooms" />
                 </SelectTrigger>
@@ -464,13 +467,14 @@ const Calendar = () => {
               </div>
             </div>
             
-            <Select defaultValue="list-view">
+            <Select value={currentView} onValueChange={(value: "list-view" | "calendar-view" | "yearly-view") => setCurrentView(value)}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="list-view">List view</SelectItem>
                 <SelectItem value="calendar-view">Calendar view</SelectItem>
+                <SelectItem value="yearly-view">Yearly view</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -489,6 +493,19 @@ const Calendar = () => {
           </div>
         </div>
 
+        {/* Calendar Content */}
+        {currentView === "yearly-view" ? (
+          <YearlyView 
+            roomTypes={roomTypes}
+            closedDates={closedDates}
+            selectedRoomTypeFilter={selectedRoomTypeFilter}
+            onDateClick={(date) => {
+              // Handle date click in yearly view - could open bulk edit or navigate
+              console.log('Date clicked:', date);
+            }}
+          />
+        ) : (
+          <React.Fragment>
         {/* Calendar Grid - Horizontal Scroll Container */}
         <div className="overflow-hidden">
           <div className="min-w-auto">
@@ -1005,7 +1022,8 @@ const Calendar = () => {
           </div>
           </div>
         </div>
-      </div>
+        </React.Fragment>
+        )}
 
       {/* Simple Bulk Edit Dialog for Drag Selections */}
       <Sheet open={simpleBulkEditOpen} onOpenChange={setSimpleBulkEditOpen}>
@@ -1095,6 +1113,7 @@ const Calendar = () => {
           </div>
         </SheetContent>
       </Sheet>
+      </div>
     </div>
   );
 };
