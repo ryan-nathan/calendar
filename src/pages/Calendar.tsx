@@ -882,21 +882,19 @@ const Calendar = () => {
                         const isSaturday = dayName === 'Sat';
                         
                         return (
-                          <div key={`${roomType.id}-rooms-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer relative",
-                            isClosed && "bg-red-200",
-                            isInDragRange(index, roomType.id) && "bg-blue-200",
-                             isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
+                           <div key={`${roomType.id}-rooms-${index}`} className={cn(
+                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer relative",
+                             isClosed && "bg-red-200",
+                             isInDragRange(index, roomType.id) && "bg-blue-200",
+                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                            )}
-                             onMouseDown={(e) => {
-                               // Don't start dragging if clicking on editable value
-                               if (e.target !== e.currentTarget) return;
-                               handleMouseDown(roomType.id, index);
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               if (!isEditing) {
+                                 handleCellClick(roomType.id, index, 'roomsToSell');
+                               }
                              }}
-                             onMouseMove={() => handleMouseMove(index)}
-                            onMouseUp={handleMouseUp}
-                            onMouseEnter={() => handleMouseMove(index)}
-                          >
+                           >
                             {isEditing ? (
                               <Input
                                 ref={inputRef}
@@ -908,16 +906,11 @@ const Calendar = () => {
                                 type="number"
                                 min="0"
                               />
-                            ) : (
-                              <span 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCellClick(roomType.id, index, 'roomsToSell');
-                                }}
-                              >
-                                {roomType.data.roomsToSell[dataIndex]}
-                              </span>
-                            )}
+                             ) : (
+                               <span>
+                                 {roomType.data.roomsToSell[dataIndex]}
+                               </span>
+                             )}
                           </div>
                         );
                       })}
@@ -971,21 +964,19 @@ const Calendar = () => {
                         const isSaturday = dayName === 'Sat';
                         
                         return (
-                          <div key={`${roomType.id}-rate-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer relative",
-                            isClosed && "bg-red-200",
-                            isInDragRange(index, roomType.id) && "bg-blue-200",
-                            isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
+                           <div key={`${roomType.id}-rate-${index}`} className={cn(
+                             "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer relative",
+                             isClosed && "bg-red-200",
+                             isInDragRange(index, roomType.id) && "bg-blue-200",
+                             isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                            )}
-                             onMouseDown={(e) => {
-                               // Don't start dragging if clicking on editable value
-                               if (e.target !== e.currentTarget) return;
-                               handleMouseDown(roomType.id, index);
+                             onClick={(e) => {
+                               e.stopPropagation();
+                               if (!isEditing) {
+                                 handleCellClick(roomType.id, index, 'rates');
+                               }
                              }}
-                             onMouseMove={() => handleMouseMove(index)}
-                            onMouseUp={handleMouseUp}
-                            onMouseEnter={() => handleMouseMove(index)}
-                          >
+                           >
                             {isEditing ? (
                               <Input
                                 ref={inputRef}
@@ -997,18 +988,12 @@ const Calendar = () => {
                                 type="number"
                                 min="0"
                               />
-                            ) : (
-                              <div 
-                                className="text-center flex flex-col items-center justify-center h-full"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCellClick(roomType.id, index, 'rates');
-                                }}
-                              >
-                                <span className="text-[10px] text-muted-foreground -mb-px">THB</span>
-                                <span className="text-xs font-medium">{roomType.data.rates[dataIndex]}</span>
-                              </div>
-                            )}
+                             ) : (
+                               <div className="text-center flex flex-col items-center justify-center h-full">
+                                 <span className="text-[10px] text-muted-foreground -mb-px">THB</span>
+                                 <span className="text-xs font-medium">{roomType.data.rates[dataIndex]}</span>
+                               </div>
+                             )}
                           </div>
                         );
                       })}
