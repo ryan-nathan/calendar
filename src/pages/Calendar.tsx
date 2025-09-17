@@ -1343,7 +1343,7 @@ const Calendar = () => {
                     <span className="text-xs font-medium">Room status</span>
                   </div>
                   <div className="h-12 relative">
-                    {/* Render segments */}
+                    {/* Background segments without hover */}
                     {createDateSegments(roomType.id, calendarDates).map((segment, segmentIndex) => {
                       const cellWidth = 100 / 31; // Each cell is 1/31 of the width
                       const leftPercent = (segment.startIndex / 31) * 100;
@@ -1353,19 +1353,10 @@ const Calendar = () => {
                         return (
                           <div 
                             key={`segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-green-500 hover:bg-green-400 text-white rounded-full flex items-center justify-start pl-3 z-30 cursor-pointer transition-colors duration-200"
+                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3 z-20 pointer-events-none"
                             style={{
                               left: `calc(${leftPercent}% + 8px)`,
                               width: `calc(${widthPercent}% - 16px)`,
-                            }}
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              const firstDateIndex = segment.startIndex;
-                              handleMouseDown(roomType.id, firstDateIndex, 'status');
-                            }}
-                            onMouseUp={(e) => {
-                              e.stopPropagation();
-                              handleMouseUp();
                             }}
                           >
                             <span className="text-xs font-medium truncate pr-2">Bookable</span>
@@ -1384,19 +1375,10 @@ const Calendar = () => {
                         return (
                           <div 
                             key={`closed-segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-red-500 hover:bg-red-400 text-white rounded-full flex items-center justify-start pl-3 z-30 cursor-pointer transition-colors duration-200"
+                            className="absolute top-3 bottom-3 bg-red-500 text-white rounded-full flex items-center justify-start pl-3 z-20 pointer-events-none"
                             style={{
                               left: `calc(${leftPercent}% + 8px)`,
                               width: `calc(${widthPercent}% - 16px)`,
-                            }}
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              const firstDateIndex = segment.startIndex;
-                              handleMouseDown(roomType.id, firstDateIndex, 'status');
-                            }}
-                            onMouseUp={(e) => {
-                              e.stopPropagation();
-                              handleMouseUp();
                             }}
                           >
                             <span className="text-xs font-medium truncate pr-2">Rate Closed</span>
@@ -1406,12 +1388,13 @@ const Calendar = () => {
                       return null;
                     })}
                     
-                    {/* Clickable overlay cells */}
-                    <div className="grid grid-cols-31 h-full relative z-20">
+                    {/* Individual hoverable cells */}
+                    <div className="grid grid-cols-31 h-full relative z-30">
                       {calendarDates.map((date, index) => {
                         const inDragRange = isInMultiCellDragRange(index, roomType.id, 'status');
                         const dayName = getDayName(date);
                         const isSaturday = dayName === 'Sat';
+                        const isClosed = isDateClosed(roomType.id, date);
                         return (
                           <div 
                             key={`${roomType.id}-status-${index}`} 
@@ -1425,7 +1408,15 @@ const Calendar = () => {
                             onMouseUp={handleMouseUp}
                             onMouseEnter={() => handleMouseMove(index)}
                           >
-                            {/* Interaction area only - bubbles are rendered as segments above */}
+                            {/* Individual cell hover overlay */}
+                            {(isClosed || !isClosed) && (
+                              <div 
+                                className={cn(
+                                  "absolute inset-0 m-3 rounded-full transition-colors duration-200",
+                                  isClosed ? "hover:bg-red-400" : "hover:bg-green-400"
+                                )}
+                              />
+                            )}
                           </div>
                         );
                       })}
