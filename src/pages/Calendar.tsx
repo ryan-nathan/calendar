@@ -339,12 +339,16 @@ const Calendar = () => {
   };
 
   // Only highlight during multi-cell drag operations, not single cell clicks
-  const isInMultiCellDragRange = (dateIndex: number, roomTypeId: string) => {
+  const isInMultiCellDragRange = (dateIndex: number, roomTypeId: string, cellType?: 'status' | 'roomsToSell' | 'rates' | 'netBooked') => {
     if (!isDragging || dragStart === null || dragEnd === null || currentDragRoomType !== roomTypeId) {
       return false;
     }
     // Only highlight if we're dragging across multiple cells
     if (dragStart === dragEnd) {
+      return false;
+    }
+    // Only highlight if the cell type matches the one being dragged
+    if (cellType && cellType !== currentDragCellType) {
       return false;
     }
     const startIndex = Math.min(dragStart, dragEnd);
@@ -936,7 +940,7 @@ const Calendar = () => {
                     {/* Clickable overlay cells */}
                     <div className="grid grid-cols-31 h-full relative z-20">
                       {calendarDates.map((date, index) => {
-                        const inDragRange = isInMultiCellDragRange(index, roomType.id);
+                        const inDragRange = isInMultiCellDragRange(index, roomType.id, 'status');
                         const dayName = getDayName(date);
                         const isSaturday = dayName === 'Sat';
                         return (
@@ -979,7 +983,7 @@ const Calendar = () => {
                              "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium cursor-pointer relative",
                              !isDragging && "hover:bg-calendar-cell-hover",
                              isClosed && "bg-red-200",
-                              isInMultiCellDragRange(index, roomType.id) && "bg-blue-200",
+                               isInMultiCellDragRange(index, roomType.id, 'roomsToSell') && "bg-blue-200",
                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                            )}
                              onMouseDown={(e) => {
@@ -1030,7 +1034,7 @@ const Calendar = () => {
                           <div key={`${roomType.id}-booked-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center relative",
                             isClosed && "bg-red-200",
-                            isInMultiCellDragRange(index, roomType.id) && "bg-blue-200",
+                             isInMultiCellDragRange(index, roomType.id, 'netBooked') && "bg-blue-200",
                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                           )}>
                             {bookedCount > 0 && (
@@ -1064,7 +1068,7 @@ const Calendar = () => {
                              "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center cursor-pointer relative",
                              !isDragging && "hover:bg-calendar-cell-hover",
                              isClosed && "bg-red-200",
-                             isInMultiCellDragRange(index, roomType.id) && "bg-blue-200",
+                             isInMultiCellDragRange(index, roomType.id, 'rates') && "bg-blue-200",
                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                            )}
                               onMouseDown={(e) => {
