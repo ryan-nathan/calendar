@@ -511,7 +511,10 @@ const Calendar = () => {
           {/* Room Types */}
           <div className="space-y-0">
             {roomTypes.map((roomType, roomIndex) => (
-              <div key={roomType.id} className="border-x border-b border-calendar-grid-border">
+              <div key={roomType.id} className={cn(
+                "border-x border-b border-calendar-grid-border",
+                roomIndex === roomTypes.length - 1 && "rounded-b-lg"
+              )}>
                 {/* Room Type Header */}
                 <div className="grid grid-cols-[220px_1fr] bg-muted/30 border-b border-calendar-grid-border">
                   <div className="p-3 border-r border-calendar-grid-border flex items-center">
