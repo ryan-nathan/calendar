@@ -89,7 +89,17 @@ const Calendar = () => {
   const [currentView, setCurrentView] = useState<"list-view" | "yearly-view">("list-view");
   const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("all-rooms");
 
-  // Generate calendar dates from current start date (31 days total)
+  const getCurrentSyncTime = () => {
+    const now = new Date();
+    const day = now.getDate();
+    const month = now.toLocaleDateString('en-GB', { month: 'short' });
+    const year = now.getFullYear();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    
+    return `${day} ${month} ${year}, ${hours}:${minutes}`;
+  };
+
   const generateCalendarDates = () => {
     const dates = [];
     let currentDate = new Date(currentStartDate);
@@ -460,7 +470,7 @@ const Calendar = () => {
               </div>
               
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Last sync: 16 Sept 2025, 14:26</span>
+                <span>Last sync: {getCurrentSyncTime()}</span>
                 <Button variant="link" size="sm" className="h-auto p-0 text-primary">
                   Learn more
                 </Button>
