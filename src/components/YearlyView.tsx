@@ -110,6 +110,10 @@ export const YearlyView = ({
           <span>Sold out / Closed</span>
         </div>
         <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-yellow-200 border border-yellow-300 rounded"></div>
+          <span>Mixed availability</span>
+        </div>
+        <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-white border rounded"></div>
           <span>Available</span>
         </div>
