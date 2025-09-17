@@ -45,7 +45,7 @@ const roomTypes = [
 ];
 
 const Calendar = () => {
-  const [selectedDateRange, setSelectedDateRange] = useState("16 Sept 2025 - 16 Oct 2025");
+  const [currentStartDate, setCurrentStartDate] = useState(new Date(2025, 8, 16)); // Sept 16, 2025
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
   const [bulkEditData, setBulkEditData] = useState({
@@ -59,14 +59,12 @@ const Calendar = () => {
     restrictions: ""
   });
 
-  // Generate calendar dates from Sept 16 to Oct 16, 2025
+  // Generate calendar dates from current start date (31 days total)
   const generateCalendarDates = () => {
-    const startDate = new Date(2025, 8, 16); // Sept 16, 2025
-    const endDate = new Date(2025, 9, 16); // Oct 16, 2025
     const dates = [];
+    let currentDate = new Date(currentStartDate);
     
-    let currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
+    for (let i = 0; i < 31; i++) {
       dates.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -75,6 +73,40 @@ const Calendar = () => {
   };
 
   const calendarDates = generateCalendarDates();
+  
+  // Generate date range string for display
+  const generateDateRangeString = () => {
+    const endDate = new Date(currentStartDate);
+    endDate.setDate(endDate.getDate() + 30);
+    
+    const startStr = currentStartDate.toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+    const endStr = endDate.toLocaleDateString('en-GB', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: 'numeric' 
+    });
+    
+    return `${startStr} - ${endStr}`;
+  };
+
+  const selectedDateRange = generateDateRangeString();
+
+  // Navigation functions
+  const handlePreviousWeek = () => {
+    const newDate = new Date(currentStartDate);
+    newDate.setDate(newDate.getDate() - 7);
+    setCurrentStartDate(newDate);
+  };
+
+  const handleNextWeek = () => {
+    const newDate = new Date(currentStartDate);
+    newDate.setDate(newDate.getDate() + 7);
+    setCurrentStartDate(newDate);
+  };
   
   // Group dates by month for display
   const septemberDates = calendarDates.filter(date => date.getMonth() === 8);
@@ -165,9 +197,22 @@ const Calendar = () => {
           <div className="grid grid-cols-[200px_1fr] mb-4">
             <div></div>
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">September 2025</h2>
-              <h2 className="text-xl font-semibold">October 2025</h2>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={handlePreviousWeek}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="flex gap-8">
+                {calendarDates.slice(0, 15).some((date, index) => index === 0 || date.getMonth() !== calendarDates[index - 1]?.getMonth()) && (
+                  <h2 className="text-xl font-semibold">
+                    {calendarDates[0]?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </h2>
+                )}
+                {calendarDates.slice(15).some((date, index) => calendarDates[14 + index]?.getMonth() !== calendarDates[14 + index - 1]?.getMonth()) && (
+                  <h2 className="text-xl font-semibold">
+                    {calendarDates.find((date, index) => index > 14 && date.getMonth() !== calendarDates[index - 1]?.getMonth())?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </h2>
+                )}
+              </div>
+              <Button variant="ghost" size="sm" onClick={handleNextWeek}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
