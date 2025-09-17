@@ -404,10 +404,15 @@ const Calendar = () => {
       console.log('Using form dates:', fromDate, toDate);
     }
     
-    // Find all calendar dates within the specified range
-    const affectedDates = calendarDates.filter(date => {
-      return date >= fromDate && date <= toDate;
-    });
+    // Build dates directly from range (works for yearly selections too)
+    const affectedDates: Date[] = [];
+    {
+      const d = new Date(fromDate);
+      while (d <= toDate) {
+        affectedDates.push(new Date(d));
+        d.setDate(d.getDate() + 1);
+      }
+    }
     
     console.log('Affected dates:', affectedDates.length);
     
