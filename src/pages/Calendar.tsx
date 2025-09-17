@@ -998,6 +998,7 @@ const Calendar = () => {
                           <div key={`${roomType.id}-booked-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center relative",
                             isClosed && "bg-red-200",
+                            isInMultiCellDragRange(index, roomType.id) && "bg-blue-200",
                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                           )}>
                             {bookedCount > 0 && (
