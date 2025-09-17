@@ -58,6 +58,10 @@ const Calendar = () => {
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
   const [closedDates, setClosedDates] = useState<{[roomTypeId: string]: {[dateKey: string]: boolean}}>({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<number | null>(null);
+  const [dragEnd, setDragEnd] = useState<number | null>(null);
+  const [currentDragRoomType, setCurrentDragRoomType] = useState<string | null>(null);
   const [bulkEditData, setBulkEditData] = useState({
     fromDate: "2025-09-16",
     toDate: "2025-10-16",
@@ -197,6 +201,66 @@ const Calendar = () => {
     }
 
     return segments;
+  };
+
+  const handleMouseDown = (roomTypeId: string, dateIndex: number) => {
+    setIsDragging(true);
+    setDragStart(dateIndex);
+    setDragEnd(dateIndex);
+    setCurrentDragRoomType(roomTypeId);
+  };
+
+  const handleMouseMove = (dateIndex: number) => {
+    if (isDragging && dragStart !== null) {
+      setDragEnd(dateIndex);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging && dragStart !== null && dragEnd !== null && currentDragRoomType) {
+      const startIndex = Math.min(dragStart, dragEnd);
+      const endIndex = Math.max(dragStart, dragEnd);
+      
+      // Toggle all dates in the range
+      const dateKeys: string[] = [];
+      for (let i = startIndex; i <= endIndex; i++) {
+        const date = calendarDates[i];
+        if (date) {
+          dateKeys.push(getDateKey(date));
+        }
+      }
+      
+      setClosedDates(prev => {
+        const newClosedDates = { ...prev };
+        if (!newClosedDates[currentDragRoomType]) {
+          newClosedDates[currentDragRoomType] = {};
+        }
+        
+        // Determine if we should close or open based on the first date in range
+        const firstDateKey = dateKeys[0];
+        const shouldClose = !newClosedDates[currentDragRoomType][firstDateKey];
+        
+        dateKeys.forEach(dateKey => {
+          newClosedDates[currentDragRoomType][dateKey] = shouldClose;
+        });
+        
+        return newClosedDates;
+      });
+    }
+    
+    setIsDragging(false);
+    setDragStart(null);
+    setDragEnd(null);
+    setCurrentDragRoomType(null);
+  };
+
+  const isInDragRange = (dateIndex: number, roomTypeId: string) => {
+    if (!isDragging || dragStart === null || dragEnd === null || currentDragRoomType !== roomTypeId) {
+      return false;
+    }
+    const startIndex = Math.min(dragStart, dragEnd);
+    const endIndex = Math.max(dragStart, dragEnd);
+    return dateIndex >= startIndex && dateIndex <= endIndex;
   };
 
   return (
@@ -546,11 +610,15 @@ const Calendar = () => {
                     <div className="grid grid-cols-31 h-full relative z-10">
                       {calendarDates.map((date, index) => {
                         const isClosed = isDateClosed(roomType.id, date);
+                        const inDragRange = isInDragRange(index, roomType.id);
                         return (
                           <div 
                             key={`${roomType.id}-status-${index}`} 
-                            className="border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center"
-                            onClick={() => toggleDateStatus(roomType.id, date)}
+                            className={`border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center ${inDragRange ? 'bg-blue-200' : ''}`}
+                            onMouseDown={() => handleMouseDown(roomType.id, index)}
+                            onMouseMove={() => handleMouseMove(index)}
+                            onMouseUp={handleMouseUp}
+                            onMouseEnter={() => handleMouseMove(index)}
                           >
                             {isClosed && (
                               <div className="w-16 h-6 bg-red-500 text-white rounded-full flex items-center justify-center z-20 relative">
