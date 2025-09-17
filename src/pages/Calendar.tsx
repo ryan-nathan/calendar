@@ -1400,7 +1400,7 @@ const Calendar = () => {
                                 
                               return (
                                 <span className={cn(
-                                  "pointer-events-none text-xs font-medium z-40 pl-[34px] pr-3 text-white whitespace-nowrap overflow-hidden text-ellipsis"
+                                  "pointer-events-none text-xs font-medium z-40 pl-[24px] pr-3 text-white whitespace-nowrap"
                                 )}>
                                   {text}
                                 </span>
