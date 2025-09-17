@@ -136,30 +136,29 @@ export const MonthCalendar = ({
       </h3>
 
       {/* Days of Week Header */}
-      <div className="grid grid-cols-7 gap-px mb-1">
+      <div className="grid grid-cols-7 gap-0 mb-0">
         {dayNames.map(day => (
-          <div key={day} className="text-center text-[10px] font-medium text-muted-foreground py-1">
+          <div key={day} className="text-center text-[10px] font-medium text-muted-foreground py-1 bg-muted/30 border-r border-b border-border last:border-r-0">
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar Grid */}
-      <div className="space-y-px">
+      <div className="space-y-0">
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 gap-px">
+          <div key={weekIndex} className="grid grid-cols-7 gap-0">
             {week.map((date, dayIndex) => (
               <div
                 key={dayIndex}
                 className={cn(
-                  "w-6 h-6 flex items-center justify-center text-[10px] border border-transparent cursor-pointer hover:border-border transition-colors",
-                  date && "hover:bg-muted/50",
+                  "w-6 h-6 flex items-center justify-center text-[10px] border-r border-b border-border cursor-pointer hover:bg-muted/50 transition-colors last:border-r-0",
                   date && isToday(date) && "bg-accent text-accent-foreground font-semibold",
                   date && getDateAvailabilityStatus(date) === 'closed' && "bg-red-200 text-red-900",
                   date && getDateAvailabilityStatus(date) === 'bookable' && "bg-green-200 text-green-900",
                   date && getDateAvailabilityStatus(date) === 'sold-out' && "bg-red-200 text-red-900",
                   date && getDateAvailabilityStatus(date) === 'mixed' && "bg-yellow-200 text-yellow-900",
-                  !date && "cursor-default"
+                  !date && "cursor-default bg-muted/10"
                 )}
                 onClick={() => date && onDateClick?.(date)}
               >
