@@ -10,8 +10,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-// Base date for data arrays (original start date)
-const BASE_DATA_DATE = new Date(2025, 8, 16); // Sept 16, 2025
+// Base date for data arrays (today's date)
+const BASE_DATA_DATE = new Date();
 
 // Sample data - in real app this would come from API
 const initialRoomTypes = [
@@ -55,7 +55,7 @@ const getDataIndexForDate = (date: Date): number => {
 
 const Calendar = () => {
   const [roomTypes, setRoomTypes] = useState(initialRoomTypes);
-  const [currentStartDate, setCurrentStartDate] = useState(new Date(2025, 8, 16)); // Sept 16, 2025
+  const [currentStartDate, setCurrentStartDate] = useState(new Date()); // Today
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [simpleBulkEditOpen, setSimpleBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
@@ -68,8 +68,8 @@ const Calendar = () => {
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [bulkEditData, setBulkEditData] = useState({
-    fromDate: "2025-09-16",
-    toDate: "2025-10-16",
+    fromDate: new Date().toISOString().split('T')[0], // Today
+    toDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
     daysOfWeek: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     roomsToSell: "",
     rateType: "Standard Rate",
