@@ -446,12 +446,16 @@ const Calendar = () => {
       }
     }
     
-    // Build dates directly from range (works for yearly selections too)
+    // Build dates directly from range and filter by selected days of week
     const affectedDates: Date[] = [];
     {
       const d = new Date(fromDate);
       while (d <= toDate) {
-        affectedDates.push(new Date(d));
+        const dayName = getDayName(d);
+        // Only include dates that match the selected days of the week
+        if (bulkEditData.daysOfWeek.includes(dayName)) {
+          affectedDates.push(new Date(d));
+        }
         d.setDate(d.getDate() + 1);
       }
     }
