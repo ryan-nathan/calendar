@@ -152,7 +152,7 @@ export const MonthCalendar = ({
               <div
                 key={dayIndex}
                 className={cn(
-                  "w-6 h-6 flex items-center justify-center text-[10px] border-r border-b border-border cursor-pointer hover:bg-muted/50 transition-colors last:border-r-0",
+                  "h-6 flex items-center justify-center text-[10px] border-r border-b border-border cursor-pointer hover:bg-muted/50 transition-colors last:border-r-0",
                   date && isToday(date) && "bg-accent text-accent-foreground font-semibold",
                   date && getDateAvailabilityStatus(date) === 'closed' && "bg-red-200 text-red-900",
                   date && getDateAvailabilityStatus(date) === 'bookable' && "bg-green-200 text-green-900",
