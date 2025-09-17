@@ -317,9 +317,19 @@ const Calendar = () => {
   };
 
   const handleBulkEditSave = () => {
-    // Use form date inputs for date range, fall back to selection dates for drag-selected edits
-    const fromDate = new Date(bulkEditData.fromDate);
-    const toDate = new Date(bulkEditData.toDate);
+    // For comprehensive bulk edit (with form inputs), use form dates
+    // For simple bulk edit (drag selection), use selection dates
+    let fromDate: Date, toDate: Date;
+    
+    if (bulkEditSelection.startDate && bulkEditSelection.endDate) {
+      // Simple bulk edit from drag selection
+      fromDate = bulkEditSelection.startDate;
+      toDate = bulkEditSelection.endDate;
+    } else {
+      // Comprehensive bulk edit with form inputs
+      fromDate = new Date(bulkEditData.fromDate);
+      toDate = new Date(bulkEditData.toDate);
+    }
     
     // Find all calendar dates within the specified range
     const affectedDates = calendarDates.filter(date => {
@@ -364,7 +374,7 @@ const Calendar = () => {
       return roomType;
     }));
     
-    // Apply room status changes to dates within form range
+    // Apply room status changes to dates within range
     const shouldClose = bulkEditData.roomStatus === 'close';
     setClosedDates(prev => {
       const newClosedDates = { ...prev };
@@ -380,8 +390,9 @@ const Calendar = () => {
       return newClosedDates;
     });
     
-    // Close dialog and reset
+    // Close dialogs and reset
     setBulkEditOpen(false);
+    setSimpleBulkEditOpen(false);
     setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
     setBulkEditData(prev => ({ ...prev, roomsToSell: "", price: "" }));
   };
