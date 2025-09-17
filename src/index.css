@@ -17,8 +17,8 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -34,7 +34,24 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 210 100% 50%;
+
+    /* Calendar specific colors */
+    --calendar-bookable: 120 50% 85%;
+    --calendar-bookable-foreground: 120 50% 20%;
+    --calendar-rate-closed: 0 50% 85%;
+    --calendar-rate-closed-foreground: 0 50% 20%;
+    --calendar-grid-border: 214.3 31.8% 91.4%;
+    --calendar-cell-hover: 210 40% 98%;
+    --calendar-selected-range: 210 100% 95%;
+    
+    /* Status colors */
+    --status-success: 120 50% 50%;
+    --status-success-foreground: 0 0% 100%;
+    --status-warning: 45 100% 50%;
+    --status-warning-foreground: 0 0% 100%;
+    --status-info: 210 100% 50%;
+    --status-info-foreground: 0 0% 100%;
 
     --radius: 0.5rem;
 

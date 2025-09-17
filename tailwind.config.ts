@@ -47,6 +47,23 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        calendar: {
+          bookable: "hsl(var(--calendar-bookable))",
+          "bookable-foreground": "hsl(var(--calendar-bookable-foreground))",
+          "rate-closed": "hsl(var(--calendar-rate-closed))",
+          "rate-closed-foreground": "hsl(var(--calendar-rate-closed-foreground))",
+          "grid-border": "hsl(var(--calendar-grid-border))",
+          "cell-hover": "hsl(var(--calendar-cell-hover))",
+          "selected-range": "hsl(var(--calendar-selected-range))",
+        },
+        status: {
+          success: "hsl(var(--status-success))",
+          "success-foreground": "hsl(var(--status-success-foreground))",
+          warning: "hsl(var(--status-warning))",
+          "warning-foreground": "hsl(var(--status-warning-foreground))",
+          info: "hsl(var(--status-info))",
+          "info-foreground": "hsl(var(--status-info-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
