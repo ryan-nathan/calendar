@@ -1133,7 +1133,14 @@ const Calendar = () => {
                 </div>
                 <Input
                   type="number"
-                  placeholder="3750"
+                  placeholder={(() => {
+                    const roomType = getCurrentRoomType();
+                    if (roomType && bulkEditSelection.startDate) {
+                      const dataIndex = getDataIndexForDate(bulkEditSelection.startDate);
+                      return roomType.data.rates[dataIndex].toString();
+                    }
+                    return "3750";
+                  })()}
                   value={bulkEditData.price}
                   onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
                   className="flex-1"
