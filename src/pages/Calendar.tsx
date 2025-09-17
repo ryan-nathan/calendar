@@ -10,6 +10,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
+// Base date for data arrays (original start date)
+const BASE_DATA_DATE = new Date(2025, 8, 16); // Sept 16, 2025
+
 // Sample data - in real app this would come from API
 const roomTypes = [
   {
@@ -43,6 +46,12 @@ const roomTypes = [
     }
   }
 ];
+
+// Function to get data index for a specific date
+const getDataIndexForDate = (date: Date): number => {
+  const daysDiff = Math.floor((date.getTime() - BASE_DATA_DATE.getTime()) / (1000 * 60 * 60 * 24));
+  return Math.max(0, Math.min(30, daysDiff)); // Clamp to valid array indices
+};
 
 const Calendar = () => {
   const [currentStartDate, setCurrentStartDate] = useState(new Date(2025, 8, 16)); // Sept 16, 2025
@@ -472,11 +481,14 @@ const Calendar = () => {
                   </div>
                   <div className="h-12">
                     <div className="grid grid-cols-31 h-full">
-                      {calendarDates.map((date, index) => (
-                        <div key={`${roomType.id}-rooms-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer">
-                          {roomType.data.roomsToSell[index]}
-                        </div>
-                      ))}
+                      {calendarDates.map((date, index) => {
+                        const dataIndex = getDataIndexForDate(date);
+                        return (
+                          <div key={`${roomType.id}-rooms-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer">
+                            {roomType.data.roomsToSell[dataIndex]}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -488,15 +500,19 @@ const Calendar = () => {
                   </div>
                   <div className="h-12">
                     <div className="grid grid-cols-31 h-full">
-                      {calendarDates.map((date, index) => (
-                        <div key={`${roomType.id}-booked-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center">
-                          {roomType.data.netBooked[index] > 0 && (
-                            <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
-                              {roomType.data.netBooked[index]}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                      {calendarDates.map((date, index) => {
+                        const dataIndex = getDataIndexForDate(date);
+                        const bookedCount = roomType.data.netBooked[dataIndex];
+                        return (
+                          <div key={`${roomType.id}-booked-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center">
+                            {bookedCount > 0 && (
+                              <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                                {bookedCount}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -508,12 +524,15 @@ const Calendar = () => {
                   </div>
                   <div className="h-12">
                     <div className="grid grid-cols-31 h-full">
-                      {calendarDates.map((date, index) => (
-                        <div key={`${roomType.id}-rate-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer">
-                          <span className="text-[10px] text-muted-foreground">THB</span>
-                          <span className="text-xs font-medium">{roomType.data.rates[index]}</span>
-                        </div>
-                      ))}
+                      {calendarDates.map((date, index) => {
+                        const dataIndex = getDataIndexForDate(date);
+                        return (
+                          <div key={`${roomType.id}-rate-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer">
+                            <span className="text-[10px] text-muted-foreground">THB</span>
+                            <span className="text-xs font-medium">{roomType.data.rates[dataIndex]}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
