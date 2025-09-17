@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { MonthCalendar } from "./MonthCalendar";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,32 +37,13 @@ export const YearlyView = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{month: number, year: number, day: number} | null>(null);
   const [dragEnd, setDragEnd] = useState<{month: number, year: number, day: number} | null>(null);
-  const calendarGridRef = useRef<HTMLDivElement>(null);
 
   const handlePreviousYear = () => {
     setCurrentYear(prev => prev - 1);
-    // Smooth scroll to the top of the calendar grid
-    setTimeout(() => {
-      if (calendarGridRef.current) {
-        calendarGridRef.current.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        });
-      }
-    }, 100);
   };
 
   const handleNextYear = () => {
     setCurrentYear(prev => prev + 1);
-    // Smooth scroll to the top of the calendar grid
-    setTimeout(() => {
-      if (calendarGridRef.current) {
-        calendarGridRef.current.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        });
-      }
-    }, 100);
   };
 
   const getDateKey = (date: Date) => {
@@ -166,7 +147,7 @@ export const YearlyView = ({
       </div>
 
       {/* Calendar Grid - 4 months per row */}
-      <div ref={calendarGridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {months.map(({ month, year }) => (
           <MonthCalendar
             key={`${year}-${month}`}
