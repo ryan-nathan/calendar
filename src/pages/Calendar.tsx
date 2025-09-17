@@ -589,17 +589,39 @@ const Calendar = () => {
                       const leftPercent = (segment.startIndex / 31) * 100;
                       const widthPercent = ((segment.endIndex - segment.startIndex + 1) / 31) * 100;
                       
-                      if (segment.type === 'open') {
+                       if (segment.type === 'open') {
                         return (
                           <div 
                             key={`segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3"
+                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-center"
                             style={{
                               left: `calc(${leftPercent}% + 8px)`,
                               width: `calc(${widthPercent}% - 16px)`,
                             }}
                           >
-                            {segmentIndex === 0 && <span className="text-sm font-medium">Bookable</span>}
+                            <span className="text-xs font-medium">Bookable</span>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
+                    
+                    {/* Closed date segment bubbles */}
+                    {createDateSegments(roomType.id, calendarDates).map((segment, segmentIndex) => {
+                      const leftPercent = (segment.startIndex / 31) * 100;
+                      const widthPercent = ((segment.endIndex - segment.startIndex + 1) / 31) * 100;
+                      
+                      if (segment.type === 'closed') {
+                        return (
+                          <div 
+                            key={`closed-segment-${segmentIndex}`}
+                            className="absolute top-3 bottom-3 bg-red-500 text-white rounded-full flex items-center justify-center z-20"
+                            style={{
+                              left: `calc(${leftPercent}% + 8px)`,
+                              width: `calc(${widthPercent}% - 16px)`,
+                            }}
+                          >
+                            <span className="text-xs font-medium">Rate Closed</span>
                           </div>
                         );
                       }
@@ -609,7 +631,6 @@ const Calendar = () => {
                     {/* Clickable overlay cells */}
                     <div className="grid grid-cols-31 h-full relative z-10">
                       {calendarDates.map((date, index) => {
-                        const isClosed = isDateClosed(roomType.id, date);
                         const inDragRange = isInDragRange(index, roomType.id);
                         return (
                           <div 
@@ -620,11 +641,7 @@ const Calendar = () => {
                             onMouseUp={handleMouseUp}
                             onMouseEnter={() => handleMouseMove(index)}
                           >
-                            {isClosed && (
-                              <div className="w-16 h-6 bg-red-500 text-white rounded-full flex items-center justify-center z-20 relative">
-                                <span className="text-xs font-medium">Rate Closed</span>
-                              </div>
-                            )}
+                            {/* Interaction area only - bubbles are rendered as segments above */}
                           </div>
                         );
                       })}
