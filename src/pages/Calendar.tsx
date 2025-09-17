@@ -506,7 +506,7 @@ const Calendar = () => {
               </div>
             </div>
             {/* Positioned month headers aligned with first date of each month */}
-            <div className="absolute top-2.5 left-[220px] right-0 pointer-events-none">
+            <div className="absolute top-[7px] left-[220px] right-0 pointer-events-none">
               {/* Use the same 31-column grid to align headers with borders */}
               <div className="grid grid-cols-31 h-6">
                 {(() => {
