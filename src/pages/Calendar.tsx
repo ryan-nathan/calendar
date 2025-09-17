@@ -15,48 +15,37 @@ const roomTypes = [
   {
     id: "superior",
     name: "Superior Room",
-    rooms: Array.from({ length: 31 }, (_, i) => ({
-      date: new Date(2025, 8, 16 + i), // Sept 16 onwards
-      roomsToSell: i < 15 ? 8 : (i < 20 ? 7 : (i < 25 ? 5 : 4)),
-      netBooked: i < 5 ? 0 : (i < 10 ? 1 : (i < 15 ? 2 : (i < 20 ? 1 : 3))),
-      rate: 3500,
-      status: "bookable" as const,
-      currency: "THB"
-    }))
+    data: {
+      status: "bookable",
+      roomsToSell: [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,7,7,5,4,4,5,6,7,7,7,7,7,7,7,7],
+      netBooked: [0,0,0,0,0,1,1,1,2,2,2,2,1,1,1,1,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3],
+      rates: [3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500,3500]
+    }
   },
   {
     id: "deluxe-balcony",
     name: "Deluxe Room with Balcony",
-    rooms: Array.from({ length: 31 }, (_, i) => ({
-      date: new Date(2025, 8, 16 + i),
-      roomsToSell: i < 15 ? 7 : (i < 20 ? 6 : (i < 25 ? 3 : 1)),
-      netBooked: i < 5 ? 0 : (i < 10 ? 1 : (i < 15 ? 2 : (i < 20 ? 2 : 2))),
-      rate: 3750,
-      status: "bookable" as const,
-      currency: "THB"
-    }))
+    data: {
+      status: "bookable",
+      roomsToSell: [7,7,6,7,7,7,7,7,7,7,7,7,7,7,7,7,5,3,4,1,3,3,4,4,4,4,4,4,4,4,4],
+      netBooked: [0,0,0,0,0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3],
+      rates: [3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750,3750]
+    }
   },
   {
     id: "deluxe-oasis",
     name: "Deluxe Oasis Ground Floor",
-    rooms: Array.from({ length: 31 }, (_, i) => ({
-      date: new Date(2025, 8, 16 + i),
-      roomsToSell: i < 15 ? 9 : (i < 20 ? 8 : (i < 25 ? 6 : 9)),
-      netBooked: i < 5 ? 1 : (i < 10 ? 4 : (i < 15 ? 4 : (i < 20 ? 6 : 1))),
-      rate: 4100,
-      status: "bookable" as const,
-      currency: "THB"
-    }))
+    data: {
+      status: "bookable",
+      roomsToSell: [9,9,8,8,8,8,8,8,8,8,10,9,9,6,6,6,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+      netBooked: [1,1,1,4,4,4,4,4,6,6,6,6,6,3,3,6,4,4,1,1,2,2,2,2,2,2,2,2,2,2,2],
+      rates: [4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100,4100]
+    }
   }
 ];
 
-const monthNames = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"];
-
-const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
 const Calendar = () => {
-  const [selectedDateRange, setSelectedDateRange] = useState("2025-09-16 — 2025-10-16");
+  const [selectedDateRange, setSelectedDateRange] = useState("16 Sept 2025 - 16 Oct 2025");
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
   const [bulkEditData, setBulkEditData] = useState({
@@ -70,30 +59,26 @@ const Calendar = () => {
     restrictions: ""
   });
 
-  // Generate calendar data for September and October 2025
-  const generateCalendarDays = (year: number, month: number) => {
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const firstDayOfWeek = (firstDay.getDay() + 6) % 7; // Make Monday = 0
-    const daysInMonth = lastDay.getDate();
+  // Generate calendar dates from Sept 16 to Oct 16, 2025
+  const generateCalendarDates = () => {
+    const startDate = new Date(2025, 8, 16); // Sept 16, 2025
+    const endDate = new Date(2025, 9, 16); // Oct 16, 2025
+    const dates = [];
     
-    const days = [];
-    
-    // Add empty cells for days before the first day of the month
-    for (let i = 0; i < firstDayOfWeek; i++) {
-      days.push(null);
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // Add days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push(new Date(year, month, day));
-    }
-    
-    return days;
+    return dates;
   };
 
-  const septemberDays = generateCalendarDays(2025, 8); // September 2025
-  const octoberDays = generateCalendarDays(2025, 9); // October 2025
+  const calendarDates = generateCalendarDates();
+  
+  // Group dates by month for display
+  const septemberDates = calendarDates.filter(date => date.getMonth() === 8);
+  const octoberDates = calendarDates.filter(date => date.getMonth() === 9);
 
   const handleDayOfWeekToggle = (day: string) => {
     setBulkEditData(prev => ({
@@ -104,16 +89,17 @@ const Calendar = () => {
     }));
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short'
-    });
+  const getDayName = (date: Date) => {
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  };
+
+  const getDateNumber = (date: Date) => {
+    return date.getDate();
   };
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-full mx-auto overflow-x-auto">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-4">Calendar</h1>
@@ -170,262 +156,247 @@ const Calendar = () => {
         </div>
 
         {/* Calendar Grid */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-8">
+        <div className="min-w-[1400px]">
+          {/* Month Headers */}
+          <div className="grid grid-cols-[200px_1fr] mb-4">
+            <div></div>
+            <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">September 2025</h2>
               <h2 className="text-xl font-semibold">October 2025</h2>
-            </div>
-            <Button variant="ghost" size="sm">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Calendar Header */}
-          <div className="grid grid-cols-14 gap-0 border border-calendar-grid-border rounded-lg overflow-hidden">
-            {/* Month headers */}
-            <div className="col-span-7 grid grid-cols-7 bg-muted/50">
-              {dayNames.map(day => (
-                <div key={`sept-${day}`} className="p-2 text-xs font-medium text-center border-r border-calendar-grid-border last:border-r-0">
-                  {day}
-                </div>
-              ))}
-            </div>
-            <div className="col-span-7 grid grid-cols-7 bg-muted/50">
-              {dayNames.map(day => (
-                <div key={`oct-${day}`} className="p-2 text-xs font-medium text-center border-r border-calendar-grid-border last:border-r-0">
-                  {day}
-                </div>
-              ))}
+              <Button variant="ghost" size="sm">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
-          {/* Date numbers row */}
-          <div className="grid grid-cols-14 gap-0 border-x border-b border-calendar-grid-border">
-            <div className="col-span-7 grid grid-cols-7">
-              {septemberDays.map((day, index) => (
-                <div key={`sept-day-${index}`} className="h-8 border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-xs">
-                  {day ? day.getDate() : ''}
-                </div>
-              ))}
-            </div>
-            <div className="col-span-7 grid grid-cols-7">
-              {octoberDays.map((day, index) => (
-                <div key={`oct-day-${index}`} className="h-8 border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-xs">
-                  {day ? day.getDate() : ''}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Room Types */}
-        <div className="space-y-6">
-          {roomTypes.map((roomType) => (
-            <div key={roomType.id} className="border border-calendar-grid-border rounded-lg overflow-hidden">
-              {/* Room Type Header */}
-              <div className="flex items-center justify-between p-4 bg-muted/30 border-b border-calendar-grid-border">
-                <h3 className="text-lg font-semibold">{roomType.name}</h3>
-                <Sheet open={bulkEditOpen && selectedRoomType === roomType.id} onOpenChange={(open) => {
-                  setBulkEditOpen(open);
-                  if (open) setSelectedRoomType(roomType.id);
-                }}>
-                  <SheetTrigger asChild>
-                    <Button variant="default" size="sm">
-                      Bulk edit
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent className="w-[400px] sm:w-[400px]">
-                    <SheetHeader>
-                      <div className="flex items-center justify-between">
-                        <SheetTitle>Bulk edit</SheetTitle>
-                        <Button variant="ghost" size="sm" onClick={() => setBulkEditOpen(false)}>
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </SheetHeader>
-                    
-                    <div className="mt-6 space-y-6">
-                      {/* Date Range */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="from-date">From:</Label>
-                          <Input
-                            id="from-date"
-                            type="date"
-                            value={bulkEditData.fromDate}
-                            onChange={(e) => setBulkEditData(prev => ({ ...prev, fromDate: e.target.value }))}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="to-date">Up to and including:</Label>
-                          <Input
-                            id="to-date"
-                            type="date"
-                            value={bulkEditData.toDate}
-                            onChange={(e) => setBulkEditData(prev => ({ ...prev, toDate: e.target.value }))}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Days of week */}
-                      <div>
-                        <Label className="text-sm font-medium mb-3 block">
-                          Which days of the week do you want to apply changes to?
-                        </Label>
-                        <div className="grid grid-cols-4 gap-2">
-                          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-                            <div key={day} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={day}
-                                checked={bulkEditData.daysOfWeek.includes(day)}
-                                onCheckedChange={() => handleDayOfWeekToggle(day)}
-                              />
-                              <Label htmlFor={day} className="text-sm">{day}</Label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Room Type Tabs */}
-                      <div className="border-b border-calendar-grid-border">
-                        <div className="flex space-x-4">
-                          <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary">
-                            Superior
-                          </button>
-                          <button className="px-4 py-2 text-sm font-medium text-muted-foreground">
-                            Multiple room types
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Collapsible sections */}
-                      <Collapsible defaultOpen>
-                        <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                          <div>
-                            <h4 className="text-lg font-semibold">Rooms to sell</h4>
-                            <p className="text-sm text-muted-foreground">Update the number of rooms to sell for this room type</p>
-                          </div>
-                          <ChevronDown className="h-4 w-4" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-4 space-y-4">
-                          <div className="flex gap-2">
-                            <Input
-                              placeholder="Number of rooms"
-                              value={bulkEditData.roomsToSell}
-                              onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
-                            />
-                            <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
-                              Room(s)
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
-                          </p>
-                          <div className="flex gap-2">
-                            <Button size="sm">Save changes</Button>
-                            <Button variant="outline" size="sm">Cancel</Button>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-
-                      <Collapsible>
-                        <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                          <div>
-                            <h4 className="text-lg font-semibold">Prices</h4>
-                            <p className="text-sm text-muted-foreground">Edit the prices of any rate plans for this room</p>
-                          </div>
-                          <ChevronDown className="h-4 w-4" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-4 space-y-4">
-                          <div className="flex gap-2">
-                            <Select value={bulkEditData.rateType}>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Standard Rate 30% RB">Standard Rate 30% RB</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
-                              THB
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
-                          </p>
-                          <div className="flex gap-2">
-                            <Button size="sm">Save changes</Button>
-                            <Button variant="outline" size="sm">Cancel</Button>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-
-                      <Collapsible>
-                        <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                          <div>
-                            <h4 className="text-lg font-semibold">Room status</h4>
-                            <p className="text-sm text-muted-foreground">Open or close this room</p>
-                          </div>
-                          <ChevronDown className="h-4 w-4" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-4 space-y-4">
-                          <RadioGroup value={bulkEditData.roomStatus} onValueChange={(value) => setBulkEditData(prev => ({ ...prev, roomStatus: value }))}>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="open" id="open" />
-                              <Label htmlFor="open">Open room</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="close" id="close" />
-                              <Label htmlFor="close">Close room</Label>
-                            </div>
-                          </RadioGroup>
-                          <p className="text-xs text-muted-foreground">
-                            Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
-                          </p>
-                          <div className="flex gap-2">
-                            <Button size="sm">Save changes</Button>
-                            <Button variant="outline" size="sm">Cancel</Button>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-
-                      <Collapsible>
-                        <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                          <div>
-                            <h4 className="text-lg font-semibold">Restrictions</h4>
-                            <p className="text-sm text-muted-foreground">Edit, add or remove restrictions for any rate plan for this room</p>
-                          </div>
-                          <ChevronDown className="h-4 w-4" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-4 space-y-4">
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a rate plan" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="standard">Standard Rate</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button variant="link" size="sm" className="text-primary p-0">
-                            <span className="mr-1">+</span> Add more
-                          </Button>
-                          <p className="text-xs text-muted-foreground">
-                            Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
-                          </p>
-                          <div className="flex gap-2">
-                            <Button size="sm">Save changes</Button>
-                            <Button variant="outline" size="sm">Cancel</Button>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+          {/* Calendar Header - Days and Dates */}
+          <div className="grid grid-cols-[200px_1fr] border border-calendar-grid-border rounded-t-lg overflow-hidden">
+            <div className="bg-muted/50 border-r border-calendar-grid-border"></div>
+            <div className="bg-muted/50">
+              <div className="grid grid-cols-31 h-full">
+                {calendarDates.map((date, index) => (
+                  <div key={index} className="border-r border-calendar-grid-border last:border-r-0">
+                    <div className="p-1 text-center">
+                      <div className="text-xs text-muted-foreground">{getDayName(date)}</div>
+                      <div className="text-xs font-medium">{getDateNumber(date)}</div>
                     </div>
-                  </SheetContent>
-                </Sheet>
+                  </div>
+                ))}
               </div>
+            </div>
+          </div>
 
-              {/* Room Data Rows */}
-              <div className="space-y-0">
+          {/* Room Types */}
+          <div className="space-y-0">
+            {roomTypes.map((roomType, roomIndex) => (
+              <div key={roomType.id} className="border-x border-b border-calendar-grid-border">
+                {/* Room Type Header */}
+                <div className="grid grid-cols-[200px_1fr] bg-muted/30 border-b border-calendar-grid-border">
+                  <div className="p-3 border-r border-calendar-grid-border">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">{roomType.name}</h3>
+                    </div>
+                  </div>
+                  <div className="p-3 flex justify-end">
+                    <Sheet open={bulkEditOpen && selectedRoomType === roomType.id} onOpenChange={(open) => {
+                      setBulkEditOpen(open);
+                      if (open) setSelectedRoomType(roomType.id);
+                    }}>
+                      <SheetTrigger asChild>
+                        <Button variant="default" size="sm">
+                          Bulk edit
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent className="w-[400px] sm:w-[400px]">
+                        <SheetHeader>
+                          <div className="flex items-center justify-between">
+                            <SheetTitle>Bulk edit</SheetTitle>
+                            <Button variant="ghost" size="sm" onClick={() => setBulkEditOpen(false)}>
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </SheetHeader>
+                        
+                        <div className="mt-6 space-y-6">
+                          {/* Date Range */}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="from-date">From:</Label>
+                              <Input
+                                id="from-date"
+                                type="date"
+                                value={bulkEditData.fromDate}
+                                onChange={(e) => setBulkEditData(prev => ({ ...prev, fromDate: e.target.value }))}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="to-date">Up to and including:</Label>
+                              <Input
+                                id="to-date"
+                                type="date"
+                                value={bulkEditData.toDate}
+                                onChange={(e) => setBulkEditData(prev => ({ ...prev, toDate: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Days of week */}
+                          <div>
+                            <Label className="text-sm font-medium mb-3 block">
+                              Which days of the week do you want to apply changes to?
+                            </Label>
+                            <div className="grid grid-cols-4 gap-2">
+                              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
+                                <div key={day} className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={day}
+                                    checked={bulkEditData.daysOfWeek.includes(day)}
+                                    onCheckedChange={() => handleDayOfWeekToggle(day)}
+                                  />
+                                  <Label htmlFor={day} className="text-sm">{day}</Label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Room Type Tabs */}
+                          <div className="border-b border-calendar-grid-border">
+                            <div className="flex space-x-4">
+                              <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary">
+                                Superior
+                              </button>
+                              <button className="px-4 py-2 text-sm font-medium text-muted-foreground">
+                                Multiple room types
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Collapsible sections */}
+                          <Collapsible defaultOpen>
+                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
+                              <div>
+                                <h4 className="text-lg font-semibold">Rooms to sell</h4>
+                                <p className="text-sm text-muted-foreground">Update the number of rooms to sell for this room type</p>
+                              </div>
+                              <ChevronDown className="h-4 w-4" />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="mt-4 space-y-4">
+                              <div className="flex gap-2">
+                                <Input
+                                  placeholder="Number of rooms"
+                                  value={bulkEditData.roomsToSell}
+                                  onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
+                                />
+                                <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
+                                  Room(s)
+                                </div>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
+                              </p>
+                              <div className="flex gap-2">
+                                <Button size="sm">Save changes</Button>
+                                <Button variant="outline" size="sm">Cancel</Button>
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+
+                          <Collapsible>
+                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
+                              <div>
+                                <h4 className="text-lg font-semibold">Prices</h4>
+                                <p className="text-sm text-muted-foreground">Edit the prices of any rate plans for this room</p>
+                              </div>
+                              <ChevronDown className="h-4 w-4" />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="mt-4 space-y-4">
+                              <div className="flex gap-2">
+                                <Select value={bulkEditData.rateType}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="Standard Rate 30% RB">Standard Rate 30% RB</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
+                                  THB
+                                </div>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
+                              </p>
+                              <div className="flex gap-2">
+                                <Button size="sm">Save changes</Button>
+                                <Button variant="outline" size="sm">Cancel</Button>
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+
+                          <Collapsible>
+                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
+                              <div>
+                                <h4 className="text-lg font-semibold">Room status</h4>
+                                <p className="text-sm text-muted-foreground">Open or close this room</p>
+                              </div>
+                              <ChevronDown className="h-4 w-4" />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="mt-4 space-y-4">
+                              <RadioGroup value={bulkEditData.roomStatus} onValueChange={(value) => setBulkEditData(prev => ({ ...prev, roomStatus: value }))}>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="open" id="open" />
+                                  <Label htmlFor="open">Open room</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <RadioGroupItem value="close" id="close" />
+                                  <Label htmlFor="close">Close room</Label>
+                                </div>
+                              </RadioGroup>
+                              <p className="text-xs text-muted-foreground">
+                                Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
+                              </p>
+                              <div className="flex gap-2">
+                                <Button size="sm">Save changes</Button>
+                                <Button variant="outline" size="sm">Cancel</Button>
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+
+                          <Collapsible>
+                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
+                              <div>
+                                <h4 className="text-lg font-semibold">Restrictions</h4>
+                                <p className="text-sm text-muted-foreground">Edit, add or remove restrictions for any rate plan for this room</p>
+                              </div>
+                              <ChevronDown className="h-4 w-4" />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="mt-4 space-y-4">
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a rate plan" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="standard">Standard Rate</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Button variant="link" size="sm" className="text-primary p-0">
+                                <span className="mr-1">+</span> Add more
+                              </Button>
+                              <p className="text-xs text-muted-foreground">
+                                Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
+                              </p>
+                              <div className="flex gap-2">
+                                <Button size="sm">Save changes</Button>
+                                <Button variant="outline" size="sm">Cancel</Button>
+                              </div>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+                </div>
+
                 {/* Room Status Row */}
                 <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
@@ -436,18 +407,11 @@ const Calendar = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="p-0">
-                    <div className="grid grid-cols-14 h-full">
-                      <div className="col-span-7 grid grid-cols-7">
-                        {septemberDays.map((day, index) => (
-                          <div key={`${roomType.id}-status-sept-${index}`} className="h-12 border-r border-calendar-grid-border last:border-r-0 bg-calendar-bookable"></div>
-                        ))}
-                      </div>
-                      <div className="col-span-7 grid grid-cols-7">
-                        {octoberDays.map((day, index) => (
-                          <div key={`${roomType.id}-status-oct-${index}`} className="h-12 border-r border-calendar-grid-border last:border-r-0 bg-calendar-bookable"></div>
-                        ))}
-                      </div>
+                  <div className="h-12">
+                    <div className="grid grid-cols-31 h-full">
+                      {calendarDates.map((date, index) => (
+                        <div key={`${roomType.id}-status-${index}`} className="border-r border-calendar-grid-border last:border-r-0 bg-calendar-bookable hover:bg-calendar-bookable/80 cursor-pointer"></div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -462,22 +426,13 @@ const Calendar = () => {
                       </Button>
                     </div>
                   </div>
-                  <div className="p-0">
-                    <div className="grid grid-cols-14 h-full">
-                      <div className="col-span-7 grid grid-cols-7">
-                        {roomType.rooms.slice(0, septemberDays.filter(d => d).length).map((room, index) => (
-                          <div key={`${roomType.id}-rooms-sept-${index}`} className="h-12 border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm hover:bg-calendar-cell-hover cursor-pointer">
-                            {room.roomsToSell}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="col-span-7 grid grid-cols-7">
-                        {roomType.rooms.slice(septemberDays.filter(d => d).length).map((room, index) => (
-                          <div key={`${roomType.id}-rooms-oct-${index}`} className="h-12 border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm hover:bg-calendar-cell-hover cursor-pointer">
-                            {room.roomsToSell}
-                          </div>
-                        ))}
-                      </div>
+                  <div className="h-12">
+                    <div className="grid grid-cols-31 h-full">
+                      {calendarDates.map((date, index) => (
+                        <div key={`${roomType.id}-rooms-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer">
+                          {roomType.data.roomsToSell[index]}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -487,36 +442,23 @@ const Calendar = () => {
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
                     <span className="text-sm font-medium">Net booked</span>
                   </div>
-                  <div className="p-0">
-                    <div className="grid grid-cols-14 h-full">
-                      <div className="col-span-7 grid grid-cols-7">
-                        {roomType.rooms.slice(0, septemberDays.filter(d => d).length).map((room, index) => (
-                          <div key={`${roomType.id}-booked-sept-${index}`} className="h-12 border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center">
-                            {room.netBooked > 0 && (
-                              <div className="w-6 h-6 bg-muted text-muted-foreground rounded-full flex items-center justify-center text-xs">
-                                {room.netBooked}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="col-span-7 grid grid-cols-7">
-                        {roomType.rooms.slice(septemberDays.filter(d => d).length).map((room, index) => (
-                          <div key={`${roomType.id}-booked-oct-${index}`} className="h-12 border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center">
-                            {room.netBooked > 0 && (
-                              <div className="w-6 h-6 bg-muted text-muted-foreground rounded-full flex items-center justify-center text-xs">
-                                {room.netBooked}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                  <div className="h-12">
+                    <div className="grid grid-cols-31 h-full">
+                      {calendarDates.map((date, index) => (
+                        <div key={`${roomType.id}-booked-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center">
+                          {roomType.data.netBooked[index] > 0 && (
+                            <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                              {roomType.data.netBooked[index]}
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
 
                 {/* Standard Rate Row */}
-                <div className="grid grid-cols-[200px_1fr]">
+                <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border last:border-b-0">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
                     <div className="flex items-center gap-1">
                       <ChevronDown className="h-4 w-4" />
@@ -527,30 +469,20 @@ const Calendar = () => {
                       <span className="text-xs">2 Edit</span>
                     </div>
                   </div>
-                  <div className="p-0">
-                    <div className="grid grid-cols-14 h-full">
-                      <div className="col-span-7 grid grid-cols-7">
-                        {roomType.rooms.slice(0, septemberDays.filter(d => d).length).map((room, index) => (
-                          <div key={`${roomType.id}-rate-sept-${index}`} className="h-12 border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center text-xs hover:bg-calendar-cell-hover cursor-pointer">
-                            <span className="text-[10px] text-muted-foreground">{room.currency}</span>
-                            <span className="font-medium">{room.rate}</span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="col-span-7 grid grid-cols-7">
-                        {roomType.rooms.slice(septemberDays.filter(d => d).length).map((room, index) => (
-                          <div key={`${roomType.id}-rate-oct-${index}`} className="h-12 border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center text-xs hover:bg-calendar-cell-hover cursor-pointer">
-                            <span className="text-[10px] text-muted-foreground">{room.currency}</span>
-                            <span className="font-medium">{room.rate}</span>
-                          </div>
-                        ))}
-                      </div>
+                  <div className="h-12">
+                    <div className="grid grid-cols-31 h-full">
+                      {calendarDates.map((date, index) => (
+                        <div key={`${roomType.id}-rate-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer">
+                          <span className="text-[10px] text-muted-foreground">THB</span>
+                          <span className="text-xs font-medium">{roomType.data.rates[index]}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
