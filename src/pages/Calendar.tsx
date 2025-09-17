@@ -496,7 +496,6 @@ const Calendar = () => {
           <div className="grid grid-cols-[220px_1fr] mb-4">
             <div></div>
             <div className="flex items-center justify-between">
-              <div></div>
               <div className="flex gap-8">
                 {calendarDates.slice(0, 15).some((date, index) => index === 0 || date.getMonth() !== calendarDates[index - 1]?.getMonth()) && (
                   <h2 className="text-sm font-medium">
