@@ -684,8 +684,34 @@ const Calendar = () => {
             selectedRoomTypeFilter={selectedRoomTypeFilter}
             baseDataDate={BASE_DATA_DATE}
             onDateClick={(date) => {
-              // Handle date click in yearly view - could open bulk edit or navigate
+              // Handle date click in yearly view - load current values and open sheet
               console.log('Date clicked:', date);
+              
+              // Set up bulk edit selection for the clicked date
+              setBulkEditSelection({
+                startDate: date,
+                endDate: date,
+                roomTypeId: selectedRoomTypeFilter
+              });
+              
+              // Get current values for this date
+              const roomType = roomTypes.find(rt => rt.id === selectedRoomTypeFilter);
+              if (roomType) {
+                const dataIndex = getDataIndexForDate(date);
+                const dateKey = date.toISOString().split('T')[0];
+                const isCurrentlyClosed = closedDates[selectedRoomTypeFilter]?.[dateKey] || false;
+                
+                // Populate the sheet fields with current values
+                setBulkEditData(prev => ({
+                  ...prev,
+                  roomsToSell: roomType.data.roomsToSell[dataIndex].toString(),
+                  price: roomType.data.rates[dataIndex].toString(),
+                  roomStatus: isCurrentlyClosed ? 'close' : 'open'
+                }));
+              }
+              
+              // Open the simple bulk edit sheet
+              setSimpleBulkEditOpen(true);
             }}
             onToggleDateStatus={toggleDateStatus}
             onOpenBulkEdit={(startDate, endDate, roomTypeId) => {
