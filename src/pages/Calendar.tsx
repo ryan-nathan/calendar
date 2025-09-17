@@ -638,16 +638,6 @@ const Calendar = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Select value={currentView} onValueChange={handleViewChange}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="list-view">List view</SelectItem>
-                  <SelectItem value="yearly-view">Yearly view</SelectItem>
-                </SelectContent>
-              </Select>
-              
               <Button
                 variant="outline"
                 size="sm"
@@ -657,6 +647,16 @@ const Calendar = () => {
               >
                 Undo
               </Button>
+              
+              <Select value={currentView} onValueChange={handleViewChange}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="list-view">List view</SelectItem>
+                  <SelectItem value="yearly-view">Yearly view</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
