@@ -154,6 +154,12 @@ export const MonthCalendar = ({
                 onMouseMove={() => date && onMouseMove && onMouseMove(month, year, date.getDate())}
                 onMouseUp={() => onMouseUp && onMouseUp()}
                 onMouseEnter={() => date && onMouseMove && onMouseMove(month, year, date.getDate())}
+                onClick={() => {
+                  if (date && onDateClick && !isDragging) {
+                    console.log('MonthCalendar: Date clicked', date);
+                    onDateClick(date);
+                  }
+                }}
               >
                 {date ? date.getDate() : ''}
               </div>
