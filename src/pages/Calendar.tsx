@@ -423,11 +423,6 @@ const Calendar = () => {
                 <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
                     <span className="text-sm font-medium">Rooms to sell</span>
-                    <div className="mt-1">
-                      <Button variant="link" size="sm" className="text-primary p-0 h-auto text-xs">
-                        Bulk edit
-                      </Button>
-                    </div>
                   </div>
                   <div className="h-12">
                     <div className="grid grid-cols-31 h-full">
