@@ -516,7 +516,7 @@ const Calendar = () => {
                 <div className="grid grid-cols-[220px_1fr] bg-muted/30 border-b border-calendar-grid-border">
                   <div className="p-3 border-r border-calendar-grid-border">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-base font-semibold">{roomType.name}</h3>
+                      <h3 className="text-sm font-semibold truncate">{roomType.name}</h3>
                     </div>
                   </div>
                   <div className="p-3 flex justify-end">
