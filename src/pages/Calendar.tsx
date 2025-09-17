@@ -514,13 +514,11 @@ const Calendar = () => {
                 calendarDates.forEach((date, index) => {
                   if (date.getMonth() !== currentMonth) {
                     currentMonth = date.getMonth();
-                    // Center the header on the first date cell of the month
-                    const cellWidth = 100 / 31; // Each cell is 1/31 of the width
-                    const leftPercent = (index * cellWidth) + (cellWidth / 2);
+                    const leftPercent = (index / 31) * 100;
                     monthHeaders.push(
                       <h2 
                         key={`month-${currentMonth}-${date.getFullYear()}`}
-                        className="absolute text-sm font-medium transform -translate-x-1/2"
+                        className="absolute text-sm font-medium"
                         style={{ left: `${leftPercent}%` }}
                       >
                         {date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
