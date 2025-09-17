@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import { DateRange } from "react-day-picker";
 import { YearlyView } from "@/components/YearlyView";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 // Base date for data arrays (today's date)
 const BASE_DATA_DATE = new Date();
@@ -59,7 +59,6 @@ const getDataIndexForDate = (date: Date): number => {
 };
 
 const Calendar = () => {
-  const { toast } = useToast();
   const [roomTypes, setRoomTypes] = useState(initialRoomTypes);
   const [currentStartDate, setCurrentStartDate] = useState(new Date()); // Today
   const [dateRangeSelection, setDateRangeSelection] = useState<DateRange | undefined>();
@@ -451,10 +450,7 @@ const Calendar = () => {
       setClosedDates(previousClosedDatesState);
       setPreviousRoomTypesState(null);
       setPreviousClosedDatesState(null);
-      toast({
-        title: "Changes reverted",
-        description: "Your data has been restored to the previous state.",
-      });
+      toast.success("Changes reverted");
     } else {
       console.log('No previous state to restore');
     }
