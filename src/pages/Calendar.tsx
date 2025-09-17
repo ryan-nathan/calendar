@@ -69,6 +69,7 @@ const Calendar = () => {
   const [dragStart, setDragStart] = useState<number | null>(null);
   const [dragEnd, setDragEnd] = useState<number | null>(null);
   const [currentDragRoomType, setCurrentDragRoomType] = useState<string | null>(null);
+  const [currentDragCellType, setCurrentDragCellType] = useState<'status' | 'roomsToSell' | 'rates' | null>(null);
   const [editingCell, setEditingCell] = useState<{roomTypeId: string, dateIndex: number, field: 'roomsToSell' | 'rates'} | null>(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -239,11 +240,12 @@ const Calendar = () => {
     return segments;
   };
 
-  const handleMouseDown = (roomTypeId: string, dateIndex: number) => {
+  const handleMouseDown = (roomTypeId: string, dateIndex: number, cellType: 'status' | 'roomsToSell' | 'rates' = 'status') => {
     setIsDragging(true);
     setDragStart(dateIndex);
     setDragEnd(dateIndex);
     setCurrentDragRoomType(roomTypeId);
+    setCurrentDragCellType(cellType);
   };
 
   const handleMouseMove = (dateIndex: number) => {
@@ -253,15 +255,21 @@ const Calendar = () => {
   };
 
   const handleMouseUp = () => {
-    if (isDragging && dragStart !== null && dragEnd !== null && currentDragRoomType) {
+    if (isDragging && dragStart !== null && dragEnd !== null && currentDragRoomType && currentDragCellType) {
       const startIndex = Math.min(dragStart, dragEnd);
       const endIndex = Math.max(dragStart, dragEnd);
       
-      // If it's a single click (start and end are the same), toggle that single date
+      // If it's a single click (start and end are the same)
       if (startIndex === endIndex) {
         const date = calendarDates[startIndex];
         if (date) {
-          toggleDateStatus(currentDragRoomType, date);
+          if (currentDragCellType === 'status') {
+            // Toggle date status for status cells
+            toggleDateStatus(currentDragRoomType, date);
+          } else if (currentDragCellType === 'roomsToSell' || currentDragCellType === 'rates') {
+            // Open inline edit for rates/rooms cells
+            handleCellClick(currentDragRoomType, startIndex, currentDragCellType);
+          }
         }
       } else {
         // For drag selection of multiple dates, open simple bulk edit dialog
@@ -284,6 +292,7 @@ const Calendar = () => {
     setDragStart(null);
     setDragEnd(null);
     setCurrentDragRoomType(null);
+    setCurrentDragCellType(null);
   };
 
   const isInDragRange = (dateIndex: number, roomTypeId: string) => {
@@ -888,7 +897,7 @@ const Calendar = () => {
                               inDragRange && "bg-blue-200",
                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                             )}
-                            onMouseDown={() => handleMouseDown(roomType.id, index)}
+                            onMouseDown={() => handleMouseDown(roomType.id, index, 'status')}
                             onMouseMove={() => handleMouseMove(index)}
                             onMouseUp={handleMouseUp}
                             onMouseEnter={() => handleMouseMove(index)}
@@ -922,14 +931,15 @@ const Calendar = () => {
                              isInDragRange(index, roomType.id) && "bg-blue-200",
                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                            )}
-                             onClick={(e) => {
+                             onMouseDown={(e) => {
                                e.stopPropagation();
-                               if (!isEditing) {
-                                 handleCellClick(roomType.id, index, 'roomsToSell');
-                               }
+                               handleMouseDown(roomType.id, index, 'roomsToSell');
                              }}
-                           >
-                            {isEditing ? (
+                             onMouseMove={() => handleMouseMove(index)}
+                             onMouseUp={handleMouseUp}
+                             onMouseEnter={() => handleMouseMove(index)}
+                            >
+                             {isEditing ? (
                               <Input
                                 ref={inputRef}
                                 value={editValue}
@@ -1003,14 +1013,15 @@ const Calendar = () => {
                              isClosed && "bg-red-200",
                              isInDragRange(index, roomType.id) && "bg-blue-200",
                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
-                           )}
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               if (!isEditing) {
-                                 handleCellClick(roomType.id, index, 'rates');
-                               }
-                             }}
-                           >
+                            )}
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                handleMouseDown(roomType.id, index, 'rates');
+                              }}
+                              onMouseMove={() => handleMouseMove(index)}
+                              onMouseUp={handleMouseUp}
+                              onMouseEnter={() => handleMouseMove(index)}
+                            >
                             {isEditing ? (
                               <Input
                                 ref={inputRef}
