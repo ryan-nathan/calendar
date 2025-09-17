@@ -39,6 +39,7 @@ All colors MUST be HSL.
     /* Calendar specific colors */
     --calendar-bookable: 120 50% 85%;
     --calendar-bookable-foreground: 120 50% 20%;
+    --calendar-bookable-hover: 120 50% 92%;
     --calendar-rate-closed: 0 50% 85%;
     --calendar-rate-closed-foreground: 0 50% 20%;
     --calendar-grid-border: 214.3 31.8% 91.4%;
