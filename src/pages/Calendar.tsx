@@ -738,26 +738,7 @@ const Calendar = () => {
                                   Room(s)
                                 </div>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
-                              </p>
-                              <div className="flex gap-2">
-                                <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
-                                <Button variant="outline" size="sm" onClick={() => setBulkEditOpen(false)}>Cancel</Button>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                              <div className="text-left">
-                                <h4 className="text-lg font-semibold">Prices</h4>
-                                <p className="text-sm text-muted-foreground">Edit the prices of any rate plans for this room</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-4 space-y-4">
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 mt-4">
                                 <Select value={bulkEditData.rateType} onValueChange={(value) => setBulkEditData(prev => ({ ...prev, rateType: value }))}>
                                   <SelectTrigger className="flex-1">
                                     <SelectValue />
