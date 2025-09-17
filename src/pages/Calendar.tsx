@@ -470,81 +470,109 @@ const Calendar = () => {
         </div>
 
         {/* Calendar Grid - Horizontal Scroll Container */}
-        <div className="flex">
-          {/* Fixed Left Sidebar */}
-          <div className="w-[220px] flex-shrink-0 bg-background z-10">
-            {/* Header spacer */}
-            <div className="h-[72px] border-b"></div>
-            
-            {/* Room Type Labels */}
-            {roomTypes.map((roomType) => (
-              <div key={roomType.id} className="space-y-0">
-                <div className="h-12 flex items-center px-4 text-sm font-medium border-b border-border bg-muted/50">
-                  {roomType.name}
-                </div>
-                <div className="h-8 flex items-center px-4 text-xs text-muted-foreground border-b border-border">
-                  Rooms to Sell
-                </div>
-                <div className="h-8 flex items-center px-4 text-xs text-muted-foreground border-b border-border">
-                  Net Booked
-                </div>
-                <div className="h-8 flex items-center px-4 text-xs text-muted-foreground border-b border-border">
-                  Rate (INR)
-                </div>
+        <div className="overflow-hidden">
+          <div className="flex">
+            {/* Fixed Left Sidebar */}
+            <div className="w-[220px] flex-shrink-0 bg-background z-10">
+              {/* Header spacer for month/date headers */}
+              <div className="h-16 border-b border-border">
+                <div className="h-8 border-b border-border bg-muted"></div>
+                <div className="h-8"></div>
               </div>
-            ))}
-          </div>
-
-          {/* Scrollable Calendar Grid */}
-          <div 
-            ref={scrollContainerRef}
-            className="flex-1 overflow-x-auto overflow-y-hidden"
-            onScroll={handleScroll}
-          >
-            <div className="min-w-max">
-              {/* Month Headers */}
-              <div className="flex h-[72px] border-b">
-                {Object.entries(datesByMonth).map(([monthKey, dates]) => (
-                  <div key={monthKey} className="flex flex-col">
-                    <div className="h-8 flex items-center justify-center text-sm font-semibold bg-muted px-2 border-r border-border" style={{width: `${(dates as Date[]).length * 64}px`}}>
-                      {getMonthName((dates as Date[])[0])}
-                    </div>
-                    <div className="flex h-8">
-                      {(dates as Date[]).map((date, index) => (
-                        <div
-                          key={index}
-                          className="w-16 h-8 flex items-center justify-center text-xs font-medium text-foreground border-r border-border"
-                        >
-                          {getDateNumber(date)}
-                        </div>
-                      ))}
+              
+              {/* Room Type Labels */}
+              {roomTypes.map((roomType) => (
+                <div key={roomType.id} className="space-y-0">
+                  <div className="h-12 flex items-center px-4 text-sm font-medium border-b border-border bg-muted/50">
+                    {roomType.name}
+                  </div>
+                  
+                  <div className="h-12 border-b border-border">
+                    <div className="p-3 bg-muted/30 border-r border-border">
+                      <span className="text-xs font-medium">Rooms to sell</span>
                     </div>
                   </div>
-                ))}
-              </div>
+                  
+                  <div className="h-12 border-b border-border">
+                    <div className="p-3 bg-muted/30 border-r border-border">
+                      <span className="text-xs font-medium">Net booked</span>
+                    </div>
+                  </div>
+                  
+                  <div className="h-12 border-b border-border">
+                    <div className="p-3 bg-muted/30 border-r border-border">
+                      <span className="text-xs font-medium">Standard Rate</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-              {/* Calendar Rows */}
-              <div className="space-y-0">
-                {roomTypes.map((roomType) => (
-                  <div key={roomType.id} className="space-y-0">
-                    {/* Room Type Header */}
-                    <div className="h-12 flex border-b border-border bg-muted/50">
-                      <div className="flex">
+            {/* Scrollable Calendar Grid */}
+            <div 
+              ref={scrollContainerRef}
+              className="flex-1 overflow-x-auto overflow-y-hidden"
+              onScroll={handleScroll}
+            >
+              <div className="min-w-max">
+                {/* Month Headers */}
+                <div className="h-8 border-b border-border bg-muted flex">
+                  {Object.entries(datesByMonth).map(([monthKey, dates]) => (
+                    <div 
+                      key={monthKey} 
+                      className="flex items-center justify-center text-sm font-semibold bg-muted px-2 border-r border-border" 
+                      style={{width: `${(dates as Date[]).length * 64}px`}}
+                    >
+                      {getMonthName((dates as Date[])[0])}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Date Headers */}
+                <div className="h-8 border-b border-border flex">
+                  {calendarDates.map((date, index) => {
+                    const dayName = getDayName(date);
+                    const isSaturday = dayName === 'Sat';
+                    return (
+                      <div
+                        key={index}
+                        className={cn(
+                          "w-16 h-8 flex flex-col items-center justify-center text-xs font-medium text-foreground border-r border-border relative",
+                          isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
+                        )}
+                      >
+                        <span className="text-[10px] text-muted-foreground -mb-px">{dayName}</span>
+                        <span className="text-xs font-medium">{getDateNumber(date)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Calendar Rows */}
+                <div className="space-y-0">
+                  {roomTypes.map((roomType) => (
+                    <div key={roomType.id} className="space-y-0">
+                      {/* Room Type Header */}
+                      <div className="h-12 border-b border-border bg-muted/50 flex">
                         {calendarDates.map((date, dateIndex) => {
                           const isClosed = isDateClosed(roomType.id, date);
                           const isInRange = isInDragRange(dateIndex, roomType.id);
+                          const dayName = getDayName(date);
+                          const isSaturday = dayName === 'Sat';
                           
                           return (
                             <div
                               key={dateIndex}
                               className={cn(
-                                "w-16 h-12 border-r border-border flex items-center justify-center cursor-pointer",
+                                "w-16 h-12 border-r border-border flex items-center justify-center cursor-pointer relative",
                                 isClosed ? "bg-red-100" : "bg-background hover:bg-muted/30",
-                                isInRange && "bg-primary/20"
+                                isInRange && "bg-primary/20",
+                                isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                               )}
                               onMouseDown={() => handleMouseDown(roomType.id, dateIndex)}
                               onMouseMove={() => handleMouseMove(dateIndex)}
                               onMouseUp={handleMouseUp}
+                              onMouseEnter={() => handleMouseMove(dateIndex)}
                             >
                               {isClosed && (
                                 <X className="h-3 w-3 text-red-600" />
@@ -553,11 +581,9 @@ const Calendar = () => {
                           );
                         })}
                       </div>
-                    </div>
-                    
-                    {/* Rooms to Sell Row */}
-                    <div className="h-8 border-b border-border">
-                      <div className="flex">
+                      
+                      {/* Rooms to Sell Row */}
+                      <div className="h-12 border-b border-border flex">
                         {calendarDates.map((date, dateIndex) => {
                           const dataIndex = getDataIndexForDate(date);
                           const roomsToSell = roomType.data.roomsToSell[dataIndex];
@@ -566,15 +592,22 @@ const Calendar = () => {
                                           editingCell?.dateIndex === dateIndex && 
                                           editingCell?.field === 'roomsToSell';
                           const isInRange = isInDragRange(dateIndex, roomType.id);
+                          const dayName = getDayName(date);
+                          const isSaturday = dayName === 'Sat';
                           
                           return (
                             <div
                               key={dateIndex}
                               className={cn(
-                                "w-16 h-8 border-r border-border flex items-center justify-center text-xs cursor-pointer relative",
+                                "w-16 h-12 border-r border-border flex items-center justify-center cursor-pointer relative",
                                 isClosed ? "bg-red-100 text-red-800" : "bg-background hover:bg-muted/50",
-                                isInRange && "bg-primary/20"
+                                isInRange && "bg-primary/20",
+                                isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                               )}
+                              onMouseDown={() => handleMouseDown(roomType.id, dateIndex)}
+                              onMouseMove={() => handleMouseMove(dateIndex)}
+                              onMouseUp={handleMouseUp}
+                              onMouseEnter={() => handleMouseMove(dateIndex)}
                               onClick={() => !isDragging && handleCellClick(roomType.id, dateIndex, 'roomsToSell')}
                             >
                               {isEditing ? (
@@ -584,10 +617,18 @@ const Calendar = () => {
                                   onChange={(e) => setEditValue(e.target.value)}
                                   onKeyDown={handleKeyDown}
                                   onBlur={handleSaveEdit}
-                                  className="h-6 w-12 text-xs p-1 text-center border-0 bg-transparent"
+                                  className="w-full h-8 text-center text-sm p-1 border-0 bg-white shadow-sm"
+                                  type="number"
+                                  min="0"
                                 />
                               ) : (
-                                <span className={cn(isClosed && "line-through")}>
+                                <span 
+                                  className={cn("text-xs font-medium", isClosed && "line-through")}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCellClick(roomType.id, dateIndex, 'roomsToSell');
+                                  }}
+                                >
                                   {roomsToSell}
                                 </span>
                               )}
@@ -595,36 +636,37 @@ const Calendar = () => {
                           );
                         })}
                       </div>
-                    </div>
-                    
-                    {/* Net Booked Row */}
-                    <div className="h-8 border-b border-border">
-                      <div className="flex">
+                      
+                      {/* Net Booked Row */}
+                      <div className="h-12 border-b border-border flex">
                         {calendarDates.map((date, dateIndex) => {
                           const dataIndex = getDataIndexForDate(date);
                           const netBooked = roomType.data.netBooked[dataIndex];
                           const isClosed = isDateClosed(roomType.id, date);
+                          const dayName = getDayName(date);
+                          const isSaturday = dayName === 'Sat';
                           
                           return (
                             <div
                               key={dateIndex}
                               className={cn(
-                                "w-16 h-8 border-r border-border flex items-center justify-center text-xs",
-                                isClosed ? "bg-red-100 text-red-800" : "bg-background"
+                                "w-16 h-12 border-r border-border flex items-center justify-center relative",
+                                isClosed ? "bg-red-100 text-red-800" : "bg-background",
+                                isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                               )}
                             >
-                              <span className={cn(isClosed && "line-through")}>
-                                {netBooked}
-                              </span>
+                              {netBooked > 0 && (
+                                <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                                  {netBooked}
+                                </div>
+                              )}
                             </div>
                           );
                         })}
                       </div>
-                    </div>
-                    
-                    {/* Rates Row */}
-                    <div className="h-8 border-b border-border">
-                      <div className="flex">
+                      
+                      {/* Rates Row */}
+                      <div className="h-12 border-b border-border flex">
                         {calendarDates.map((date, dateIndex) => {
                           const dataIndex = getDataIndexForDate(date);
                           const rate = roomType.data.rates[dataIndex];
@@ -632,14 +674,23 @@ const Calendar = () => {
                           const isEditing = editingCell?.roomTypeId === roomType.id && 
                                           editingCell?.dateIndex === dateIndex && 
                                           editingCell?.field === 'rates';
+                          const isInRange = isInDragRange(dateIndex, roomType.id);
+                          const dayName = getDayName(date);
+                          const isSaturday = dayName === 'Sat';
                           
                           return (
                             <div
                               key={dateIndex}
                               className={cn(
-                                "w-16 h-8 border-r border-border flex items-center justify-center text-xs cursor-pointer",
-                                isClosed ? "bg-red-100 text-red-800" : "bg-background hover:bg-muted/50"
+                                "w-16 h-12 border-r border-border flex flex-col items-center justify-center hover:bg-muted/50 cursor-pointer relative",
+                                isClosed ? "bg-red-100 text-red-800" : "bg-background",
+                                isInRange && "bg-primary/20",
+                                isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                               )}
+                              onMouseDown={() => handleMouseDown(roomType.id, dateIndex)}
+                              onMouseMove={() => handleMouseMove(dateIndex)}
+                              onMouseUp={handleMouseUp}
+                              onMouseEnter={() => handleMouseMove(dateIndex)}
                               onClick={() => handleCellClick(roomType.id, dateIndex, 'rates')}
                             >
                               {isEditing ? (
@@ -647,22 +698,31 @@ const Calendar = () => {
                                   ref={inputRef}
                                   value={editValue}
                                   onChange={(e) => setEditValue(e.target.value)}
-                                  onKeyDown={handleKeyDown}
                                   onBlur={handleSaveEdit}
-                                  className="h-6 w-12 text-xs p-1 text-center border-0 bg-transparent"
+                                  onKeyDown={handleKeyDown}
+                                  className="w-full h-8 text-center text-xs p-1 border-0 bg-white shadow-sm"
+                                  type="number"
+                                  min="0"
                                 />
                               ) : (
-                                <span className={cn(isClosed && "line-through")}>
-                                  {rate}
-                                </span>
+                                <div 
+                                  className="text-center flex flex-col items-center justify-center h-full"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCellClick(roomType.id, dateIndex, 'rates');
+                                  }}
+                                >
+                                  <span className="text-[10px] text-muted-foreground -mb-px">THB</span>
+                                  <span className={cn("text-xs font-medium", isClosed && "line-through")}>{rate}</span>
+                                </div>
                               )}
                             </div>
                           );
                         })}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
