@@ -73,6 +73,7 @@ const Calendar = () => {
   const [editingCell, setEditingCell] = useState<{roomTypeId: string, dateIndex: number, field: 'roomsToSell' | 'rates'} | null>(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const calendarGridRef = useRef<HTMLDivElement>(null);
   const [bulkEditData, setBulkEditData] = useState({
     dateRange: undefined as DateRange | undefined,
     daysOfWeek: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
@@ -166,12 +167,28 @@ const Calendar = () => {
     const newDate = new Date(currentStartDate);
     newDate.setDate(newDate.getDate() - 7);
     setCurrentStartDate(newDate);
+    
+    // Smooth scroll to top of calendar grid
+    setTimeout(() => {
+      calendarGridRef.current?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 50);
   };
 
   const handleNextWeek = () => {
     const newDate = new Date(currentStartDate);
     newDate.setDate(newDate.getDate() + 7);
     setCurrentStartDate(newDate);
+    
+    // Smooth scroll to top of calendar grid
+    setTimeout(() => {
+      calendarGridRef.current?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 50);
   };
 
   // Handle date range picker changes
@@ -666,7 +683,7 @@ const Calendar = () => {
         ) : (
           <React.Fragment>
         {/* Calendar Grid - Horizontal Scroll Container */}
-        <div className="overflow-hidden">
+        <div ref={calendarGridRef} className="overflow-hidden">
           <div className="min-w-auto">
           {/* Month Headers */}
           <div className="grid grid-cols-[220px_1fr] mb-4 relative">
