@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { DateRangePicker } from "@/components/DateRangePicker";
 
 // Base date for data arrays (today's date)
 const BASE_DATA_DATE = new Date();
@@ -466,9 +467,7 @@ const Calendar = () => {
 
           {/* Date Range and Restrictions */}
           <div className="flex items-center gap-4 mb-6">
-            <div className="px-4 py-2 border border-primary rounded-md text-sm font-medium text-primary bg-primary/5">
-              {selectedDateRange}
-            </div>
+            <DateRangePicker />
             
             <div className="flex items-center gap-2">
               <Checkbox id="restrictions" />
