@@ -545,7 +545,7 @@ const Calendar = () => {
                           Bulk edit
                         </Button>
                       </SheetTrigger>
-                      <SheetContent className="w-[640px] sm:w-[640px] max-w-none sm:max-w-none" style={{width: '640px'}}>
+                      <SheetContent className="w-[500px] sm:w-[500px] max-w-none sm:max-w-none" style={{width: '500px'}}>
                         <SheetHeader>
                           <SheetTitle className="text-xl font-semibold">Bulk edit</SheetTitle>
                         </SheetHeader>
