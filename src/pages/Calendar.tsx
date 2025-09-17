@@ -487,7 +487,7 @@ const Calendar = () => {
                   </div>
                   <div className="h-12 relative">
                     {/* Background green bar */}
-                    <div className="absolute inset-0 bg-green-100 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-green-100 flex items-center justify-start pl-4">
                       <span className="text-sm font-medium text-green-800">Bookable</span>
                     </div>
                     {/* Clickable overlay cells */}
