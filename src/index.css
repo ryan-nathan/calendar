@@ -37,10 +37,10 @@ All colors MUST be HSL.
     --ring: 210 100% 50%;
 
     /* Calendar specific colors */
-    --calendar-bookable: 120 50% 85%;
-    --calendar-bookable-foreground: 120 50% 20%;
-    --calendar-rate-closed: 0 50% 85%;
-    --calendar-rate-closed-foreground: 0 50% 20%;
+    --calendar-bookable: 120 60% 50%;
+    --calendar-bookable-foreground: 0 0% 100%;
+    --calendar-rate-closed: 0 60% 50%;
+    --calendar-rate-closed-foreground: 0 0% 100%;
     --calendar-grid-border: 214.3 31.8% 91.4%;
     --calendar-cell-hover: 210 40% 98%;
     --calendar-selected-range: 210 100% 95%;
