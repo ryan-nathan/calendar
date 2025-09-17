@@ -823,11 +823,11 @@ const Calendar = () => {
                               />
                             ) : (
                               <div 
-                                className="text-center flex flex-col items-center justify-center h-full"
+                                className="text-center flex flex-col items-center justify-center h-full gap-0.5"
                                 onClick={() => handleCellClick(roomType.id, index, 'rates')}
                               >
-                                <span className="text-[10px] text-muted-foreground leading-none">THB</span>
-                                <span className="text-xs font-medium leading-none">{roomType.data.rates[dataIndex]}</span>
+                                <span className="text-[10px] text-muted-foreground">THB</span>
+                                <span className="text-xs font-medium">{roomType.data.rates[dataIndex]}</span>
                               </div>
                             )}
                           </div>
