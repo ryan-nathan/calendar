@@ -1391,17 +1391,19 @@ const Calendar = () => {
                     {/* Clickable overlay cells */}
                     <div className="grid grid-cols-31 h-full relative z-20">
                       {calendarDates.map((date, index) => {
-                        const inDragRange = isInMultiCellDragRange(index, roomType.id, 'status');
-                        const dayName = getDayName(date);
-                        const isSaturday = dayName === 'Sat';
-                        return (
-                          <div 
-                            key={`${roomType.id}-status-${index}`} 
-                            className={cn(
-                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
-                              inDragRange && "bg-blue-200",
-                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
-                            )}
+                         const inDragRange = isInMultiCellDragRange(index, roomType.id, 'status');
+                         const isClosed = isDateClosed(roomType.id, date);
+                         const dayName = getDayName(date);
+                         const isSaturday = dayName === 'Sat';
+                         return (
+                           <div 
+                             key={`${roomType.id}-status-${index}`} 
+                             className={cn(
+                               "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
+                               isClosed && "bg-red-200",
+                               inDragRange && "bg-blue-200",
+                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
+                             )}
                             onMouseDown={() => handleMouseDown(roomType.id, index, 'status')}
                             onMouseMove={() => handleMouseMove(index)}
                             onMouseUp={handleMouseUp}
