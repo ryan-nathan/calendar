@@ -46,11 +46,16 @@ export const MonthCalendar = ({
 
   const isDateClosed = (date: Date) => {
     const dateKey = getDateKey(date);
-    return closedDates[selectedRoomType]?.[dateKey] || false;
+    return closedDates?.[selectedRoomType]?.[dateKey] || false;
   };
 
   const getDateAvailabilityStatus = (date: Date) => {
     if (isDateClosed(date)) return 'closed';
+    
+    // Add null check for roomTypes
+    if (!roomTypes || !Array.isArray(roomTypes)) {
+      return 'available';
+    }
     
     // If "all-rooms" is selected, check availability across all room types
     if (selectedRoomType === 'all-rooms') {
