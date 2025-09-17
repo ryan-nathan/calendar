@@ -493,7 +493,7 @@ const Calendar = () => {
         <div className="overflow-hidden">
           <div className="min-w-auto">
           {/* Month Headers */}
-          <div className="grid grid-cols-[220px_1fr] mb-1 relative">
+          <div className="grid grid-cols-[220px_1fr] mb-4 relative">
             <div></div>
             <div className="flex items-center justify-end">
               <div className="flex items-center gap-2">
@@ -506,7 +506,7 @@ const Calendar = () => {
               </div>
             </div>
             {/* Positioned month headers aligned with first date of each month */}
-            <div className="absolute bottom-0 left-[220px] right-0 pointer-events-none">
+            <div className="absolute top-0 left-[220px] right-0 pointer-events-none">
               {/* Use the same 31-column grid to align headers with borders */}
               <div className="grid grid-cols-31 h-6">
                 {(() => {
