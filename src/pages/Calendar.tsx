@@ -241,6 +241,8 @@ const Calendar = () => {
   };
 
   const handleMouseDown = (roomTypeId: string, dateIndex: number, cellType: 'status' | 'roomsToSell' | 'rates' = 'status') => {
+    // Prevent text selection during drag
+    document.body.style.userSelect = 'none';
     setIsDragging(true);
     setDragStart(dateIndex);
     setDragEnd(dateIndex);
@@ -288,6 +290,8 @@ const Calendar = () => {
       }
     }
     
+    // Restore text selection
+    document.body.style.userSelect = '';
     setIsDragging(false);
     setDragStart(null);
     setDragEnd(null);
