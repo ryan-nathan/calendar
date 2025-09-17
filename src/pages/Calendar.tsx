@@ -477,9 +477,10 @@ const Calendar = () => {
           </div>
         </div>
 
-        {/* Calendar Grid - Horizontal Scroll Container */}
-        <div className="overflow-x-auto">
-          <div className="min-w-[1800px]">
+        {/* Calendar Grid - Container with Overflow Hidden */}
+        <div className="relative overflow-hidden">
+          <div className="overflow-x-auto">
+            <div className="min-w-[1800px]">
           {/* Month Headers */}
           <div className="grid grid-cols-[220px_1fr] mb-4">
             <div></div>
@@ -982,6 +983,7 @@ const Calendar = () => {
                 </div>
               </div>
             ))}
+          </div>
           </div>
           </div>
         </div>
