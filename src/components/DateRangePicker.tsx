@@ -33,11 +33,11 @@ export function DateRangePicker({
   const displayDate = date || internalDate;
 
   const handleDateChange = (newDate: DateRange | undefined) => {
-    // If we have a complete range and user clicks a new date, start a new range
+    // If we currently have a complete range and the new selection is just a start date,
+    // this means user wants to start a new range
     if (displayDate?.from && displayDate?.to && newDate?.from && !newDate?.to) {
-      const newRange = { from: newDate.from, to: undefined };
-      setInternalDate(newRange);
-      onDateChange?.(newRange);
+      setInternalDate(newDate);
+      onDateChange?.(newDate);
       return;
     }
     
