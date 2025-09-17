@@ -480,8 +480,8 @@ const Calendar = () => {
         {/* Calendar Grid - Horizontal Scroll Container */}
         <div className="overflow-hidden">
           <div className="min-w-auto">
-          {/* Month Headers */}
-          <div className="grid grid-cols-[220px_1fr] mb-4">
+            {/* Month Headers */}
+            <div className="grid grid-cols-[220px_1fr] mb-4">
             <div></div>
             <div className="flex items-center justify-between">
               <div></div>
