@@ -116,9 +116,9 @@ const Calendar = () => {
   // Handle view switching
   const handleViewChange = (value: "list-view" | "yearly-view") => {
     if (value === "yearly-view") {
-      // When switching to yearly view, if "all-rooms" is selected, use last individual room type
+      // When switching to yearly view, if "all-rooms" is selected, use last individual room type or default to superior
       if (selectedRoomTypeFilter === "all-rooms") {
-        setSelectedRoomTypeFilter(lastIndividualRoomType);
+        setSelectedRoomTypeFilter(lastIndividualRoomType || "superior");
       }
     } else if (value === "list-view") {
       // When switching back to list view, default to "all-rooms"
