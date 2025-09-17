@@ -1343,64 +1343,21 @@ const Calendar = () => {
                     <span className="text-xs font-medium">Room status</span>
                   </div>
                   <div className="h-12 relative">
-                    {/* Background segments without hover */}
-                    {createDateSegments(roomType.id, calendarDates).map((segment, segmentIndex) => {
-                      const cellWidth = 100 / 31; // Each cell is 1/31 of the width
-                      const leftPercent = (segment.startIndex / 31) * 100;
-                      const widthPercent = ((segment.endIndex - segment.startIndex + 1) / 31) * 100;
-                      
-                        if (segment.type === 'open') {
-                        return (
-                          <div 
-                            key={`segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3 z-20 pointer-events-none"
-                            style={{
-                              left: `calc(${leftPercent}% + 8px)`,
-                              width: `calc(${widthPercent}% - 16px)`,
-                            }}
-                          >
-                            <span className="text-xs font-medium truncate pr-2">Bookable</span>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
-                    
-                    {/* Closed date segment bubbles */}
-                    {createDateSegments(roomType.id, calendarDates).map((segment, segmentIndex) => {
-                      const leftPercent = (segment.startIndex / 31) * 100;
-                      const widthPercent = ((segment.endIndex - segment.startIndex + 1) / 31) * 100;
-                      
-                      if (segment.type === 'closed') {
-                        return (
-                          <div 
-                            key={`closed-segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-red-500 text-white rounded-full flex items-center justify-start pl-3 z-20 pointer-events-none"
-                            style={{
-                              left: `calc(${leftPercent}% + 8px)`,
-                              width: `calc(${widthPercent}% - 16px)`,
-                            }}
-                          >
-                            <span className="text-xs font-medium truncate pr-2">Rate Closed</span>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
-                    
-                    {/* Individual hoverable cells */}
                     <div className="grid grid-cols-31 h-full relative z-30">
                       {calendarDates.map((date, index) => {
-                        const inDragRange = isInMultiCellDragRange(index, roomType.id, 'status');
                         const dayName = getDayName(date);
                         const isSaturday = dayName === 'Sat';
                         const isClosed = isDateClosed(roomType.id, date);
+                        const prevClosed = index > 0 ? isDateClosed(roomType.id, calendarDates[index - 1]) : null;
+                        const nextClosed = index < calendarDates.length - 1 ? isDateClosed(roomType.id, calendarDates[index + 1]) : null;
+                        const isStart = index === 0 || prevClosed !== isClosed;
+                        const isEnd = index === calendarDates.length - 1 || nextClosed !== isClosed;
                         return (
                           <div 
                             key={`${roomType.id}-status-${index}`} 
                             className={cn(
-                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
-                              inDragRange && "bg-blue-200",
+                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative group",
+                              isInMultiCellDragRange(index, roomType.id, 'status') && "bg-blue-200",
                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                             )}
                             onMouseDown={() => handleMouseDown(roomType.id, index, 'status')}
@@ -1408,14 +1365,28 @@ const Calendar = () => {
                             onMouseUp={handleMouseUp}
                             onMouseEnter={() => handleMouseMove(index)}
                           >
-                            {/* Individual cell hover overlay */}
-                            {(isClosed || !isClosed) && (
-                              <div 
-                                className={cn(
-                                  "absolute inset-0 m-3 rounded-full transition-colors duration-200",
-                                  isClosed ? "hover:bg-red-400" : "hover:bg-green-400"
-                                )}
-                              />
+                            {/* Bar fragment inside cell - highlights on hover */}
+                            <div 
+                              className={cn(
+                                "absolute inset-y-3 transition-all duration-150",
+                                isClosed 
+                                  ? "bg-calendar-rate-closed text-calendar-rate-closed-foreground"
+                                  : "bg-calendar-bookable text-calendar-bookable-foreground",
+                                isStart && isEnd
+                                  ? "left-2 right-2 rounded-full"
+                                  : isStart
+                                    ? "left-2 right-0 rounded-l-full"
+                                    : isEnd
+                                      ? "left-0 right-2 rounded-r-full"
+                                      : "left-0 right-0",
+                                "group-hover:brightness-95"
+                              )}
+                            />
+                            {/* Label only at segment start so it doesn't repeat */}
+                            {isStart && (
+                              <span className="pointer-events-none text-xs font-medium z-40 px-3 truncate">
+                                {isClosed ? "Rate Closed" : "Bookable"}
+                              </span>
                             )}
                           </div>
                         );
