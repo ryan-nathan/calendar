@@ -80,17 +80,9 @@ export const YearlyView = ({
       const actualStart = startDate <= endDate ? startDate : endDate;
       const actualEnd = startDate <= endDate ? endDate : startDate;
       
-      // If it's a single click (same date)
-      if (startDate.getTime() === endDate.getTime()) {
-        // Single click toggles status immediately
-        if (onToggleDateStatus) {
-          onToggleDateStatus(selectedRoomTypeFilter, startDate);
-        }
-      } else {
-        // Multiple dates selected - open bulk edit sidebar
-        if (onOpenBulkEdit) {
-          onOpenBulkEdit(actualStart, actualEnd, selectedRoomTypeFilter);
-        }
+      // Both single click and drag selection open bulk edit sidebar
+      if (onOpenBulkEdit) {
+        onOpenBulkEdit(actualStart, actualEnd, selectedRoomTypeFilter);
       }
     }
     
