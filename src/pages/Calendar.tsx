@@ -485,13 +485,8 @@ const Calendar = () => {
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
                     <span className="text-sm font-medium">Room status</span>
                   </div>
-                  <div className="h-12 relative">
-                    {/* Background green bar */}
-                    <div className="absolute inset-0 bg-green-100 flex items-center justify-start pl-4">
-                      <span className="text-sm font-medium text-green-800">Bookable</span>
-                    </div>
-                    {/* Clickable overlay cells */}
-                    <div className="grid grid-cols-31 h-full relative z-10">
+                  <div className="h-12">
+                    <div className="grid grid-cols-31 h-full">
                       {calendarDates.map((date, index) => {
                         const isClosed = isDateClosed(roomType.id, date);
                         return (
@@ -500,9 +495,13 @@ const Calendar = () => {
                             className="border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center"
                             onClick={() => toggleDateStatus(roomType.id, date)}
                           >
-                            {isClosed && (
+                            {isClosed ? (
                               <div className="w-16 h-6 bg-red-500 text-white rounded-full flex items-center justify-center">
                                 <span className="text-xs font-medium">Rate Closed</span>
+                              </div>
+                            ) : (
+                              <div className="w-16 h-6 bg-green-500 text-white rounded-full flex items-center justify-center">
+                                <span className="text-xs font-medium">Bookable</span>
                               </div>
                             )}
                           </div>
