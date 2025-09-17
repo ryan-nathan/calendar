@@ -76,6 +76,11 @@ const Calendar = () => {
     roomStatus: "open",
     restrictions: ""
   });
+  const [bulkEditSelection, setBulkEditSelection] = useState<{startDate: Date | null, endDate: Date | null, roomTypeId: string | null}>({
+    startDate: null,
+    endDate: null,
+    roomTypeId: null
+  });
 
   // Generate calendar dates from current start date (31 days total)
   const generateCalendarDates = () => {
@@ -232,31 +237,19 @@ const Calendar = () => {
           toggleDateStatus(currentDragRoomType, date);
         }
       } else {
-        // For drag selection, toggle all dates in the range
-        const dateKeys: string[] = [];
-        for (let i = startIndex; i <= endIndex; i++) {
-          const date = calendarDates[i];
-          if (date) {
-            dateKeys.push(getDateKey(date));
-          }
-        }
+        // For drag selection of multiple dates, open bulk edit dialog
+        const startDate = calendarDates[startIndex];
+        const endDate = calendarDates[endIndex];
         
-        setClosedDates(prev => {
-          const newClosedDates = { ...prev };
-          if (!newClosedDates[currentDragRoomType]) {
-            newClosedDates[currentDragRoomType] = {};
-          }
-          
-          // Determine if we should close or open based on the first date in range
-          const firstDateKey = dateKeys[0];
-          const shouldClose = !newClosedDates[currentDragRoomType][firstDateKey];
-          
-          dateKeys.forEach(dateKey => {
-            newClosedDates[currentDragRoomType][dateKey] = shouldClose;
+        if (startDate && endDate) {
+          setBulkEditSelection({
+            startDate,
+            endDate,
+            roomTypeId: currentDragRoomType
           });
-          
-          return newClosedDates;
-        });
+          setSelectedRoomType(currentDragRoomType);
+          setBulkEditOpen(true);
+        }
       }
     }
     
@@ -320,6 +313,79 @@ const Calendar = () => {
     } else if (e.key === 'Escape') {
       handleCancelEdit();
     }
+  };
+
+  const handleBulkEditSave = () => {
+    if (!bulkEditSelection.startDate || !bulkEditSelection.endDate || !bulkEditSelection.roomTypeId) return;
+    
+    const startIndex = calendarDates.findIndex(date => date.toDateString() === bulkEditSelection.startDate?.toDateString());
+    const endIndex = calendarDates.findIndex(date => date.toDateString() === bulkEditSelection.endDate?.toDateString());
+    
+    if (startIndex === -1 || endIndex === -1) return;
+    
+    // Apply bulk changes
+    setRoomTypes(prev => prev.map(roomType => {
+      if (roomType.id === bulkEditSelection.roomTypeId) {
+        const newData = { ...roomType.data };
+        
+        for (let i = startIndex; i <= endIndex; i++) {
+          const dataIndex = getDataIndexForDate(calendarDates[i]);
+          
+          // Update rooms to sell if specified
+          if (bulkEditData.roomsToSell) {
+            const roomsToSell = parseInt(bulkEditData.roomsToSell);
+            if (!isNaN(roomsToSell) && roomsToSell >= 0) {
+              newData.roomsToSell = [...newData.roomsToSell];
+              newData.roomsToSell[dataIndex] = roomsToSell;
+            }
+          }
+          
+          // Update price if specified
+          if (bulkEditData.price) {
+            const price = parseInt(bulkEditData.price);
+            if (!isNaN(price) && price >= 0) {
+              newData.rates = [...newData.rates];
+              newData.rates[dataIndex] = price;
+            }
+          }
+        }
+        
+        return { ...roomType, data: newData };
+      }
+      return roomType;
+    }));
+    
+    // Apply room status changes
+    if (bulkEditSelection.roomTypeId) {
+      const shouldClose = bulkEditData.roomStatus === 'close';
+      setClosedDates(prev => {
+        const newClosedDates = { ...prev };
+        if (!newClosedDates[bulkEditSelection.roomTypeId!]) {
+          newClosedDates[bulkEditSelection.roomTypeId!] = {};
+        }
+        
+        for (let i = startIndex; i <= endIndex; i++) {
+          const dateKey = getDateKey(calendarDates[i]);
+          newClosedDates[bulkEditSelection.roomTypeId!][dateKey] = shouldClose;
+        }
+        
+        return newClosedDates;
+      });
+    }
+    
+    // Close dialog and reset
+    setBulkEditOpen(false);
+    setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
+    setBulkEditData(prev => ({ ...prev, roomsToSell: "", price: "" }));
+  };
+
+  const formatDateRange = (startDate: Date, endDate: Date) => {
+    const formatOptions: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+    return `${startDate.toLocaleDateString('en-GB', formatOptions)} - ${endDate.toLocaleDateString('en-GB', formatOptions)}`;
+  };
+
+  const getCurrentRoomType = () => {
+    return roomTypes.find(rt => rt.id === bulkEditSelection.roomTypeId);
   };
 
   useEffect(() => {
@@ -454,9 +520,12 @@ const Calendar = () => {
                     </div>
                   </div>
                   <div className="p-3 flex justify-end">
-                    <Sheet open={bulkEditOpen && selectedRoomType === roomType.id} onOpenChange={(open) => {
-                      setBulkEditOpen(open);
-                      if (open) setSelectedRoomType(roomType.id);
+                    <Sheet open={bulkEditOpen && selectedRoomType === roomType.id && bulkEditSelection.roomTypeId === roomType.id} onOpenChange={(open) => {
+                      if (!open) {
+                        setBulkEditOpen(false);
+                        setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
+                        setBulkEditData(prev => ({ ...prev, roomsToSell: "", price: "" }));
+                      }
                     }}>
                       <SheetTrigger asChild>
                         <Button variant="default" size="sm">
@@ -466,7 +535,7 @@ const Calendar = () => {
                       <SheetContent className="w-[400px] sm:w-[400px]">
                         <SheetHeader>
                           <div className="flex items-center justify-between">
-                            <SheetTitle>Bulk edit</SheetTitle>
+                            <SheetTitle className="sr-only">Bulk Edit</SheetTitle>
                             <Button variant="ghost" size="sm" onClick={() => setBulkEditOpen(false)}>
                               <X className="h-4 w-4" />
                             </Button>
@@ -474,179 +543,83 @@ const Calendar = () => {
                         </SheetHeader>
                         
                         <div className="mt-6 space-y-6">
-                          {/* Date Range */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="from-date">From:</Label>
-                              <Input
-                                id="from-date"
-                                type="date"
-                                value={bulkEditData.fromDate}
-                                onChange={(e) => setBulkEditData(prev => ({ ...prev, fromDate: e.target.value }))}
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="to-date">Up to and including:</Label>
-                              <Input
-                                id="to-date"
-                                type="date"
-                                value={bulkEditData.toDate}
-                                onChange={(e) => setBulkEditData(prev => ({ ...prev, toDate: e.target.value }))}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Days of week */}
+                          {/* Room Type Header */}
                           <div>
-                            <Label className="text-sm font-medium mb-3 block">
-                              Which days of the week do you want to apply changes to?
-                            </Label>
-                            <div className="grid grid-cols-4 gap-2">
-                              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-                                <div key={day} className="flex items-center space-x-2">
-                                  <Checkbox
-                                    id={day}
-                                    checked={bulkEditData.daysOfWeek.includes(day)}
-                                    onCheckedChange={() => handleDayOfWeekToggle(day)}
-                                  />
-                                  <Label htmlFor={day} className="text-sm">{day}</Label>
-                                </div>
-                              ))}
+                            <h2 className="text-xl font-semibold">{getCurrentRoomType()?.name}</h2>
+                            <p className="text-sm text-muted-foreground">Standard Rate</p>
+                            {bulkEditSelection.startDate && bulkEditSelection.endDate && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {formatDateRange(bulkEditSelection.startDate, bulkEditSelection.endDate)}
+                              </p>
+                            )}
+                            <Button variant="link" className="text-primary p-0 mt-2 text-sm">
+                              Bulk edit
+                            </Button>
+                          </div>
+
+                          {/* Room Status */}
+                          <div className="space-y-3">
+                            <RadioGroup 
+                              value={bulkEditData.roomStatus} 
+                              onValueChange={(value) => setBulkEditData(prev => ({ ...prev, roomStatus: value }))}
+                              className="flex gap-6"
+                            >
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="open" id="bulk-open" />
+                                <Label htmlFor="bulk-open" className="text-sm font-medium">Open</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="close" id="bulk-close" />
+                                <Label htmlFor="bulk-close" className="text-sm font-medium">Close</Label>
+                              </div>
+                            </RadioGroup>
+                          </div>
+
+                          {/* Price */}
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Price</Label>
+                            <div className="flex gap-2">
+                              <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground border">
+                                THB
+                              </div>
+                              <Input
+                                type="number"
+                                placeholder="3750"
+                                value={bulkEditData.price}
+                                onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
+                                className="flex-1"
+                              />
                             </div>
                           </div>
 
-                          {/* Room Type Tabs */}
-                          <div className="border-b border-calendar-grid-border">
-                            <div className="flex space-x-4">
-                              <button className="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary">
-                                Superior
-                              </button>
-                              <button className="px-4 py-2 text-sm font-medium text-muted-foreground">
-                                Multiple room types
-                              </button>
-                            </div>
+                          {/* Rooms to sell */}
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Rooms to sell</Label>
+                            <Input
+                              type="number"
+                              placeholder="Number of rooms"
+                              value={bulkEditData.roomsToSell}
+                              onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
+                            />
                           </div>
 
-                          {/* Collapsible sections */}
-                          <Collapsible defaultOpen>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                              <div>
-                                <h4 className="text-lg font-semibold">Rooms to sell</h4>
-                                <p className="text-sm text-muted-foreground">Update the number of rooms to sell for this room type</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-4 space-y-4">
-                              <div className="flex gap-2">
-                                <Input
-                                  placeholder="Number of rooms"
-                                  value={bulkEditData.roomsToSell}
-                                  onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
-                                />
-                                <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
-                                  Room(s)
-                                </div>
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
-                              </p>
-                              <div className="flex gap-2">
-                                <Button size="sm">Save changes</Button>
-                                <Button variant="outline" size="sm">Cancel</Button>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                              <div>
-                                <h4 className="text-lg font-semibold">Prices</h4>
-                                <p className="text-sm text-muted-foreground">Edit the prices of any rate plans for this room</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-4 space-y-4">
-                              <div className="flex gap-2">
-                                <Select value={bulkEditData.rateType}>
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="Standard Rate 30% RB">Standard Rate 30% RB</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
-                                  THB
-                                </div>
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
-                              </p>
-                              <div className="flex gap-2">
-                                <Button size="sm">Save changes</Button>
-                                <Button variant="outline" size="sm">Cancel</Button>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                              <div>
-                                <h4 className="text-lg font-semibold">Room status</h4>
-                                <p className="text-sm text-muted-foreground">Open or close this room</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-4 space-y-4">
-                              <RadioGroup value={bulkEditData.roomStatus} onValueChange={(value) => setBulkEditData(prev => ({ ...prev, roomStatus: value }))}>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="open" id="open" />
-                                  <Label htmlFor="open">Open room</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="close" id="close" />
-                                  <Label htmlFor="close">Close room</Label>
-                                </div>
-                              </RadioGroup>
-                              <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
-                              </p>
-                              <div className="flex gap-2">
-                                <Button size="sm">Save changes</Button>
-                                <Button variant="outline" size="sm">Cancel</Button>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                              <div>
-                                <h4 className="text-lg font-semibold">Restrictions</h4>
-                                <p className="text-sm text-muted-foreground">Edit, add or remove restrictions for any rate plan for this room</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-4 space-y-4">
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a rate plan" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="standard">Standard Rate</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Button variant="link" size="sm" className="text-primary p-0">
-                                <span className="mr-1">+</span> Add more
-                              </Button>
-                              <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: 16 Sept 2025 - 16 Oct 2025
-                              </p>
-                              <div className="flex gap-2">
-                                <Button size="sm">Save changes</Button>
-                                <Button variant="outline" size="sm">Cancel</Button>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
+                          {/* Action Buttons */}
+                          <div className="flex gap-3 pt-4">
+                            <Button onClick={handleBulkEditSave} className="flex-1 bg-gray-600 hover:bg-gray-700 text-white">
+                              Save
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => {
+                                setBulkEditOpen(false);
+                                setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
+                                setBulkEditData(prev => ({ ...prev, roomsToSell: "", price: "" }));
+                              }}
+                              className="flex-1 text-primary border-primary"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
                         </div>
                       </SheetContent>
                     </Sheet>
