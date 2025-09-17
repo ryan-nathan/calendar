@@ -1396,16 +1396,11 @@ const Calendar = () => {
                                 }
                               }
                               
-                              const showFullWords = segmentLength > 2;
-                              const text = isClosed 
-                                ? (showFullWords ? "Rate Closed" : "Closed")
-                                : (showFullWords ? "Bookable" : "Open");
+                              const text = isClosed ? "Rate Closed" : "Bookable";
                                 
                               return (
                                 <span className={cn(
-                                  "pointer-events-none text-xs font-medium z-40 pr-3 text-white whitespace-nowrap",
-                                  showFullWords ? "pl-[34px]" : "pl-[17px]",
-                                  !showFullWords && "overflow-hidden text-ellipsis"
+                                  "pointer-events-none text-xs font-medium z-40 pl-[34px] pr-3 text-white whitespace-nowrap overflow-hidden text-ellipsis"
                                 )}>
                                   {text}
                                 </span>
