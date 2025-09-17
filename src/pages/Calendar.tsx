@@ -86,7 +86,7 @@ const Calendar = () => {
     endDate: null,
     roomTypeId: null
   });
-  const [currentView, setCurrentView] = useState<"list-view" | "calendar-view" | "yearly-view">("list-view");
+  const [currentView, setCurrentView] = useState<"list-view" | "yearly-view">("list-view");
   const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("all-rooms");
 
   // Generate calendar dates from current start date (31 days total)
@@ -467,13 +467,12 @@ const Calendar = () => {
               </div>
             </div>
             
-            <Select value={currentView} onValueChange={(value: "list-view" | "calendar-view" | "yearly-view") => setCurrentView(value)}>
+            <Select value={currentView} onValueChange={(value: "list-view" | "yearly-view") => setCurrentView(value)}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="list-view">List view</SelectItem>
-                <SelectItem value="calendar-view">Calendar view</SelectItem>
                 <SelectItem value="yearly-view">Yearly view</SelectItem>
               </SelectContent>
             </Select>
