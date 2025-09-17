@@ -507,8 +507,8 @@ const Calendar = () => {
             </div>
             {/* Positioned month headers aligned with first date of each month */}
             <div className="absolute top-0 left-[220px] right-0 pointer-events-none">
-              {/* Use the same 31-column grid to perfectly align headers to date cells */}
-              <div className="grid grid-cols-31">
+              {/* Use the same 31-column grid to align headers with borders */}
+              <div className="grid grid-cols-31 h-6">
                 {(() => {
                   const monthHeaders: JSX.Element[] = [];
                   let currentMonth = -1;
@@ -520,7 +520,7 @@ const Calendar = () => {
                       monthHeaders.push(
                         <h2
                           key={`month-${currentMonth}-${date.getFullYear()}`}
-                          className="text-sm font-medium justify-self-center"
+                          className="text-sm font-medium justify-self-start whitespace-nowrap"
                           style={{ gridColumnStart: colStart }}
                         >
                           {date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
