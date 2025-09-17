@@ -599,7 +599,7 @@ const Calendar = () => {
                               width: `calc(${widthPercent}% - 16px)`,
                             }}
                           >
-                            <span className="text-xs font-medium">Bookable</span>
+                            <span className="text-xs font-medium truncate pr-2">Bookable</span>
                           </div>
                         );
                       }
@@ -621,7 +621,7 @@ const Calendar = () => {
                               width: `calc(${widthPercent}% - 16px)`,
                             }}
                           >
-                            <span className="text-xs font-medium">Rate Closed</span>
+                            <span className="text-xs font-medium truncate pr-2">Rate Closed</span>
                           </div>
                         );
                       }
