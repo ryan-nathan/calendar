@@ -1379,7 +1379,7 @@ const Calendar = () => {
                                     : isEnd
                                       ? "left-0 right-2 rounded-r-full"
                                       : "left-0 right-0",
-                                "group-hover:brightness-95"
+                                "group-hover:brightness-110"
                               )}
                             />
                             {/* Label only at segment start so it doesn't repeat */}
