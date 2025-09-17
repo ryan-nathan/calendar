@@ -89,7 +89,7 @@ const Calendar = () => {
     roomTypeId: null
   });
   const [currentView, setCurrentView] = useState<"list-view" | "yearly-view">("list-view");
-  const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("all-rooms");
+  const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("superior");
   const [syncInfoDialogOpen, setSyncInfoDialogOpen] = useState(false);
 
   const getCurrentSyncTime = () => {
@@ -500,10 +500,9 @@ const Calendar = () => {
             <div className="flex items-center gap-4">
               <Select value={selectedRoomTypeFilter} onValueChange={setSelectedRoomTypeFilter}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="All rooms" />
+                  <SelectValue placeholder="Select room type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-rooms">All rooms</SelectItem>
                   <SelectItem value="superior">Superior Room</SelectItem>
                   <SelectItem value="deluxe-balcony">Deluxe Room with Balcony</SelectItem>
                   <SelectItem value="deluxe-oasis">Deluxe Oasis Ground Floor</SelectItem>
@@ -641,7 +640,7 @@ const Calendar = () => {
           {/* Room Types */}
           <div className="space-y-0">
             {roomTypes
-              .filter(roomType => selectedRoomTypeFilter === "all-rooms" || roomType.id === selectedRoomTypeFilter)
+              .filter(roomType => roomType.id === selectedRoomTypeFilter)
               .map((roomType, roomIndex, filteredArray) => (
               <div key={roomType.id} className={cn(
                 "border-x border-b border-calendar-grid-border",

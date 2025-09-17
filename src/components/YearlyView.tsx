@@ -75,7 +75,7 @@ export const YearlyView = ({
         </div>
 
         <div className="text-sm text-muted-foreground">
-          Room type: {roomTypes.find(rt => rt.id === selectedRoomTypeFilter)?.name || "All rooms"}
+          Room type: {roomTypes.find(rt => rt.id === selectedRoomTypeFilter)?.name || "Superior Room"}
         </div>
       </div>
 
@@ -108,10 +108,6 @@ export const YearlyView = ({
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-red-200 border border-red-300 rounded"></div>
           <span>Sold out / Closed</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-yellow-200 border border-yellow-300 rounded"></div>
-          <span>Mixed availability</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-white border rounded"></div>

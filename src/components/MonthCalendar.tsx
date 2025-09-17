@@ -57,37 +57,17 @@ export const MonthCalendar = ({
       return 'available';
     }
     
-    // If "all-rooms" is selected, check availability across all room types
-    if (selectedRoomType === 'all-rooms') {
-      let hasBookable = false;
-      let hasSoldOut = false;
-      
-      roomTypes.forEach(roomType => {
-        const dataIndex = getDataIndexForDate(date);
-        const roomsToSell = roomType.data.roomsToSell[dataIndex] || 0;
-        const netBooked = roomType.data.netBooked[dataIndex] || 0;
-        const available = roomsToSell - netBooked;
-        
-        if (available > 0) hasBookable = true;
-        if (available <= 0) hasSoldOut = true;
-      });
-      
-      if (hasBookable && !hasSoldOut) return 'bookable';
-      if (hasSoldOut && !hasBookable) return 'sold-out';
-      return 'mixed'; // Some rooms available, some sold out
-    } else {
-      // Check specific room type
-      const roomType = roomTypes.find(rt => rt.id === selectedRoomType);
-      if (!roomType) return 'available';
-      
-      const dataIndex = getDataIndexForDate(date);
-      const roomsToSell = roomType.data.roomsToSell[dataIndex] || 0;
-      const netBooked = roomType.data.netBooked[dataIndex] || 0;
-      const available = roomsToSell - netBooked;
-      
-      if (available > 0) return 'bookable';
-      if (available <= 0) return 'sold-out';
-    }
+    // Check specific room type
+    const roomType = roomTypes.find(rt => rt.id === selectedRoomType);
+    if (!roomType) return 'available';
+    
+    const dataIndex = getDataIndexForDate(date);
+    const roomsToSell = roomType.data.roomsToSell[dataIndex] || 0;
+    const netBooked = roomType.data.netBooked[dataIndex] || 0;
+    const available = roomsToSell - netBooked;
+    
+    if (available > 0) return 'bookable';
+    if (available <= 0) return 'sold-out';
     
     return 'available';
   };
@@ -157,7 +137,6 @@ export const MonthCalendar = ({
                   date && getDateAvailabilityStatus(date) === 'closed' && "bg-red-200 text-red-900",
                   date && getDateAvailabilityStatus(date) === 'bookable' && "bg-green-200 text-green-900",
                   date && getDateAvailabilityStatus(date) === 'sold-out' && "bg-red-200 text-red-900",
-                  date && getDateAvailabilityStatus(date) === 'mixed' && "bg-yellow-200 text-yellow-900",
                   !date && "cursor-default bg-muted/10"
                 )}
                 onClick={() => date && onDateClick?.(date)}
