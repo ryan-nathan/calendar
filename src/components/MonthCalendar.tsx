@@ -129,49 +129,40 @@ export const MonthCalendar = ({
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm border border-border/50 rounded-xl p-3 shadow-sm hover:shadow-md transition-all duration-200 group">
+    <div className="bg-white border border-border rounded-lg p-2">
       {/* Month Header */}
-      <h3 className="text-sm font-bold text-primary mb-3 text-center bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+      <h3 className="text-sm font-semibold text-primary mb-2 text-left">
         {monthNames[month]} {year}
       </h3>
 
       {/* Days of Week Header */}
-      <div className="grid grid-cols-7 gap-0 mb-1 overflow-hidden rounded-md">
-        {dayNames.map((day, index) => (
-          <div key={day} className={cn(
-            "text-center text-[10px] font-semibold text-muted-foreground py-1.5 bg-gradient-to-b from-muted/60 to-muted/40 border-r border-border/30",
-            index === 6 && "border-r-0"
-          )}>
+      <div className="grid grid-cols-7 gap-0 mb-0">
+        {dayNames.map(day => (
+          <div key={day} className="text-center text-[10px] font-medium text-muted-foreground py-1 bg-muted/30 border-r border-b border-border last:border-r-0">
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar Grid */}
-      <div className="overflow-hidden rounded-md border border-border/30">
+      <div className="space-y-0">
         {weeks.map((week, weekIndex) => (
           <div key={weekIndex} className="grid grid-cols-7 gap-0">
             {week.map((date, dayIndex) => (
               <div
                 key={dayIndex}
                 className={cn(
-                  "h-7 flex items-center justify-center text-[11px] font-medium border-r border-b border-border/20 cursor-pointer transition-all duration-150 relative group/cell",
-                  date && "hover:bg-primary/10 hover:scale-110 hover:z-10 hover:shadow-sm hover:font-bold",
-                  date && isToday(date) && "bg-gradient-to-br from-accent to-accent/80 text-accent-foreground font-bold shadow-sm ring-1 ring-accent/30",
-                  date && getDateAvailabilityStatus(date) === 'closed' && "bg-gradient-to-br from-red-100 to-red-200 text-red-800 hover:from-red-200 hover:to-red-300",
-                  date && getDateAvailabilityStatus(date) === 'bookable' && "bg-gradient-to-br from-green-50 to-green-100 text-green-800 hover:from-green-100 hover:to-green-200",
-                  date && getDateAvailabilityStatus(date) === 'sold-out' && "bg-gradient-to-br from-red-100 to-red-200 text-red-800 hover:from-red-200 hover:to-red-300",
-                  date && getDateAvailabilityStatus(date) === 'mixed' && "bg-gradient-to-br from-yellow-50 to-yellow-100 text-yellow-800 hover:from-yellow-100 hover:to-yellow-200",
-                  !date && "cursor-default bg-muted/10",
-                  dayIndex === 6 && "border-r-0",
-                  weekIndex === weeks.length - 1 && "border-b-0"
+                  "h-6 flex items-center justify-center text-[10px] border-r border-b border-border cursor-pointer hover:bg-muted/50 transition-colors last:border-r-0",
+                  date && isToday(date) && "bg-accent text-accent-foreground font-semibold",
+                  date && getDateAvailabilityStatus(date) === 'closed' && "bg-red-200 text-red-900",
+                  date && getDateAvailabilityStatus(date) === 'bookable' && "bg-green-200 text-green-900",
+                  date && getDateAvailabilityStatus(date) === 'sold-out' && "bg-red-200 text-red-900",
+                  date && getDateAvailabilityStatus(date) === 'mixed' && "bg-yellow-200 text-yellow-900",
+                  !date && "cursor-default bg-muted/10"
                 )}
                 onClick={() => date && onDateClick?.(date)}
               >
                 {date ? date.getDate() : ''}
-                {date && isToday(date) && (
-                  <div className="absolute inset-0 rounded-sm ring-2 ring-accent/40 animate-pulse"></div>
-                )}
               </div>
             ))}
           </div>

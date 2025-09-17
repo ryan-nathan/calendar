@@ -46,24 +46,24 @@ export const YearlyView = ({
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Year Controls */}
-      <div className="flex items-center justify-between bg-white/50 backdrop-blur-sm rounded-xl border border-border/50 p-4 shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={handlePreviousYear} className="h-8 w-8 rounded-full hover:bg-primary/10">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={handlePreviousYear}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <h2 className="text-xl font-bold min-w-[80px] text-center bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+            <h2 className="text-lg font-semibold min-w-[80px] text-center">
               {currentYear}
             </h2>
-            <Button variant="ghost" size="sm" onClick={handleNextYear} className="h-8 w-8 rounded-full hover:bg-primary/10">
+            <Button variant="ghost" size="sm" onClick={handleNextYear}>
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
 
           <Select value={dateFilter} onValueChange={setDateFilter}>
-            <SelectTrigger className="w-[140px] h-9 border-border/50 bg-white/80 hover:bg-white focus:ring-1 focus:ring-primary/30">
+            <SelectTrigger className="w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -74,13 +74,13 @@ export const YearlyView = ({
           </Select>
         </div>
 
-        <div className="text-sm font-medium text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-full">
-          Room type: <span className="text-foreground">{roomTypes.find(rt => rt.id === selectedRoomTypeFilter)?.name || "All rooms"}</span>
+        <div className="text-sm text-muted-foreground">
+          Room type: {roomTypes.find(rt => rt.id === selectedRoomTypeFilter)?.name || "All rooms"}
         </div>
       </div>
 
       {/* Calendar Grid - 4 months per row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {months.map(({ month, year }) => (
           <MonthCalendar
             key={`${year}-${month}`}
@@ -96,24 +96,22 @@ export const YearlyView = ({
       </div>
 
       {/* Legend */}
-      <div className="bg-white/50 backdrop-blur-sm rounded-xl border border-border/50 p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-accent rounded-sm border border-accent-foreground/20 shadow-sm"></div>
-            <span className="font-medium">Today</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-100 border border-green-300 rounded-sm shadow-sm"></div>
-            <span className="font-medium">Bookable</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-red-100 border border-red-300 rounded-sm shadow-sm"></div>
-            <span className="font-medium">Sold out / Closed</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-white border border-border rounded-sm shadow-sm"></div>
-            <span className="font-medium">Available</span>
-          </div>
+      <div className="flex items-center gap-4 text-xs">
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-accent rounded border"></div>
+          <span>Today</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-green-200 border border-green-300 rounded"></div>
+          <span>Bookable</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-red-200 border border-red-300 rounded"></div>
+          <span>Sold out / Closed</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-white border rounded"></div>
+          <span>Available</span>
         </div>
       </div>
     </div>
