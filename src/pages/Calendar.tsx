@@ -221,31 +221,39 @@ const Calendar = () => {
       const startIndex = Math.min(dragStart, dragEnd);
       const endIndex = Math.max(dragStart, dragEnd);
       
-      // Toggle all dates in the range
-      const dateKeys: string[] = [];
-      for (let i = startIndex; i <= endIndex; i++) {
-        const date = calendarDates[i];
+      // If it's a single click (start and end are the same), toggle that single date
+      if (startIndex === endIndex) {
+        const date = calendarDates[startIndex];
         if (date) {
-          dateKeys.push(getDateKey(date));
+          toggleDateStatus(currentDragRoomType, date);
         }
-      }
-      
-      setClosedDates(prev => {
-        const newClosedDates = { ...prev };
-        if (!newClosedDates[currentDragRoomType]) {
-          newClosedDates[currentDragRoomType] = {};
+      } else {
+        // For drag selection, toggle all dates in the range
+        const dateKeys: string[] = [];
+        for (let i = startIndex; i <= endIndex; i++) {
+          const date = calendarDates[i];
+          if (date) {
+            dateKeys.push(getDateKey(date));
+          }
         }
         
-        // Determine if we should close or open based on the first date in range
-        const firstDateKey = dateKeys[0];
-        const shouldClose = !newClosedDates[currentDragRoomType][firstDateKey];
-        
-        dateKeys.forEach(dateKey => {
-          newClosedDates[currentDragRoomType][dateKey] = shouldClose;
+        setClosedDates(prev => {
+          const newClosedDates = { ...prev };
+          if (!newClosedDates[currentDragRoomType]) {
+            newClosedDates[currentDragRoomType] = {};
+          }
+          
+          // Determine if we should close or open based on the first date in range
+          const firstDateKey = dateKeys[0];
+          const shouldClose = !newClosedDates[currentDragRoomType][firstDateKey];
+          
+          dateKeys.forEach(dateKey => {
+            newClosedDates[currentDragRoomType][dateKey] = shouldClose;
+          });
+          
+          return newClosedDates;
         });
-        
-        return newClosedDates;
-      });
+      }
     }
     
     setIsDragging(false);
