@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/DateRangePicker";
+import { DateRange } from "react-day-picker";
 
 // Base date for data arrays (today's date)
 const BASE_DATA_DATE = new Date();
@@ -57,6 +58,7 @@ const getDataIndexForDate = (date: Date): number => {
 const Calendar = () => {
   const [roomTypes, setRoomTypes] = useState(initialRoomTypes);
   const [currentStartDate, setCurrentStartDate] = useState(new Date()); // Today
+  const [dateRangeSelection, setDateRangeSelection] = useState<DateRange | undefined>();
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [simpleBulkEditOpen, setSimpleBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
@@ -131,6 +133,14 @@ const Calendar = () => {
     const newDate = new Date(currentStartDate);
     newDate.setDate(newDate.getDate() + 7);
     setCurrentStartDate(newDate);
+  };
+
+  // Handle date range picker changes
+  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
+    setDateRangeSelection(dateRange);
+    if (dateRange?.from) {
+      setCurrentStartDate(new Date(dateRange.from));
+    }
   };
   
   // Group dates by month for display
@@ -467,7 +477,10 @@ const Calendar = () => {
 
           {/* Date Range and Restrictions */}
           <div className="flex items-center gap-4 mb-6">
-            <DateRangePicker />
+            <DateRangePicker 
+              date={dateRangeSelection}
+              onDateChange={handleDateRangeChange}
+            />
             
             <div className="flex items-center gap-2">
               <Checkbox id="restrictions" />
