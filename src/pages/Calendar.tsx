@@ -1383,11 +1383,30 @@ const Calendar = () => {
                               )}
                             />
                             {/* Label only at segment start so it doesn't repeat */}
-                            {isStart && (
-                              <span className="pointer-events-none text-xs font-medium z-40 pl-[17px] pr-3 text-white whitespace-nowrap overflow-hidden text-ellipsis">
-                                {isClosed ? "Rate Closed" : "Bookable"}
-                              </span>
-                            )}
+                            {isStart && (() => {
+                              // Count consecutive cells with same status to determine if we should show full words
+                              let segmentLength = 1;
+                              for (let i = index + 1; i < calendarDates.length; i++) {
+                                const nextDate = calendarDates[i];
+                                const nextClosed = isDateClosed(roomType.id, nextDate);
+                                if (nextClosed === isClosed) {
+                                  segmentLength++;
+                                } else {
+                                  break;
+                                }
+                              }
+                              
+                              const showFullWords = segmentLength > 2;
+                              const text = isClosed 
+                                ? (showFullWords ? "Rate Closed" : "Closed")
+                                : (showFullWords ? "Bookable" : "Open");
+                                
+                              return (
+                                <span className="pointer-events-none text-xs font-medium z-40 pl-[17px] pr-3 text-white whitespace-nowrap overflow-hidden text-ellipsis">
+                                  {text}
+                                </span>
+                              );
+                            })()}
                           </div>
                         );
                       })}
