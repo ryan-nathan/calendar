@@ -1349,14 +1349,23 @@ const Calendar = () => {
                       const leftPercent = (segment.startIndex / 31) * 100;
                       const widthPercent = ((segment.endIndex - segment.startIndex + 1) / 31) * 100;
                       
-                       if (segment.type === 'open') {
+                        if (segment.type === 'open') {
                         return (
                           <div 
                             key={`segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3 z-30 pointer-events-none"
+                            className="absolute top-3 bottom-3 bg-green-500 hover:bg-green-400 text-white rounded-full flex items-center justify-start pl-3 z-30 cursor-pointer transition-colors duration-200"
                             style={{
                               left: `calc(${leftPercent}% + 8px)`,
                               width: `calc(${widthPercent}% - 16px)`,
+                            }}
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              const firstDateIndex = segment.startIndex;
+                              handleMouseDown(roomType.id, firstDateIndex, 'status');
+                            }}
+                            onMouseUp={(e) => {
+                              e.stopPropagation();
+                              handleMouseUp();
                             }}
                           >
                             <span className="text-xs font-medium truncate pr-2">Bookable</span>
@@ -1375,10 +1384,19 @@ const Calendar = () => {
                         return (
                           <div 
                             key={`closed-segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-red-500 text-white rounded-full flex items-center justify-start pl-3 z-30 pointer-events-none"
+                            className="absolute top-3 bottom-3 bg-red-500 hover:bg-red-400 text-white rounded-full flex items-center justify-start pl-3 z-30 cursor-pointer transition-colors duration-200"
                             style={{
                               left: `calc(${leftPercent}% + 8px)`,
                               width: `calc(${widthPercent}% - 16px)`,
+                            }}
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              const firstDateIndex = segment.startIndex;
+                              handleMouseDown(roomType.id, firstDateIndex, 'status');
+                            }}
+                            onMouseUp={(e) => {
+                              e.stopPropagation();
+                              handleMouseUp();
                             }}
                           >
                             <span className="text-xs font-medium truncate pr-2">Rate Closed</span>
