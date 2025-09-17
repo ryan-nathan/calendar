@@ -308,18 +308,6 @@ const Calendar = () => {
     return dateIndex >= startIndex && dateIndex <= endIndex;
   };
 
-  const isCellHighlighted = (dateIndex: number, roomTypeId: string, field: 'roomsToSell' | 'rates') => {
-    // If we're editing a specific cell, only highlight that cell
-    if (editingCell?.roomTypeId === roomTypeId && editingCell?.dateIndex === dateIndex && editingCell?.field === field) {
-      return true;
-    }
-    // If we're dragging, highlight the drag range
-    if (isDragging && isInDragRange(dateIndex, roomTypeId)) {
-      return true;
-    }
-    return false;
-  };
-
   const handleCellClick = (roomTypeId: string, dateIndex: number, field: 'roomsToSell' | 'rates') => {
     const roomType = roomTypes.find(rt => rt.id === roomTypeId);
     if (!roomType) return;
@@ -945,7 +933,7 @@ const Calendar = () => {
                              "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium cursor-pointer relative",
                              !isDragging && "hover:bg-calendar-cell-hover",
                              isClosed && "bg-red-200",
-                             isCellHighlighted(index, roomType.id, 'roomsToSell') && "bg-blue-200",
+                             isInDragRange(index, roomType.id) && "bg-blue-200",
                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                            )}
                              onMouseDown={(e) => {
@@ -1029,7 +1017,7 @@ const Calendar = () => {
                              "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center cursor-pointer relative",
                              !isDragging && "hover:bg-calendar-cell-hover",
                              isClosed && "bg-red-200",
-                             isCellHighlighted(index, roomType.id, 'rates') && "bg-blue-200",
+                             isInDragRange(index, roomType.id) && "bg-blue-200",
                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                            )}
                               onMouseDown={(e) => {
