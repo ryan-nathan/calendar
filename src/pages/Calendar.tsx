@@ -419,18 +419,25 @@ const Calendar = () => {
           </div>
 
           {/* Calendar Header - Days and Dates */}
-          <div className="grid grid-cols-[200px_1fr] border border-calendar-grid-border rounded-t-lg overflow-hidden">
+          <div className="grid grid-cols-[220px_1fr] border border-calendar-grid-border rounded-t-lg overflow-hidden">
             <div className="bg-muted/50 border-r border-calendar-grid-border"></div>
             <div className="bg-muted/50">
               <div className="grid grid-cols-31 h-full">
-                {calendarDates.map((date, index) => (
-                  <div key={index} className="border-r border-calendar-grid-border last:border-r-0">
-                    <div className="p-1 text-center">
-                      <div className="text-xs text-muted-foreground">{getDayName(date)}</div>
-                      <div className="text-xs font-medium">{getDateNumber(date)}</div>
+                {calendarDates.map((date, index) => {
+                  const dayName = getDayName(date);
+                  const isSaturday = dayName === 'Sat';
+                  return (
+                    <div key={index} className={cn(
+                      "border-r border-calendar-grid-border last:border-r-0",
+                      isSaturday && "border-r-2 border-r-blue-500"
+                    )}>
+                      <div className="p-1 text-center">
+                        <div className="text-xs text-muted-foreground">{dayName}</div>
+                        <div className="text-xs font-medium">{getDateNumber(date)}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -701,10 +708,16 @@ const Calendar = () => {
                     <div className="grid grid-cols-31 h-full relative z-10">
                       {calendarDates.map((date, index) => {
                         const inDragRange = isInDragRange(index, roomType.id);
+                        const dayName = getDayName(date);
+                        const isSaturday = dayName === 'Sat';
                         return (
                           <div 
                             key={`${roomType.id}-status-${index}`} 
-                            className={`border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center ${inDragRange ? 'bg-blue-200' : ''}`}
+                            className={cn(
+                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center",
+                              inDragRange && "bg-blue-200",
+                              isSaturday && "border-r-2 border-r-blue-500"
+                            )}
                             onMouseDown={() => handleMouseDown(roomType.id, index)}
                             onMouseMove={() => handleMouseMove(index)}
                             onMouseUp={handleMouseUp}
@@ -729,11 +742,14 @@ const Calendar = () => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
                         const isEditing = editingCell?.roomTypeId === roomType.id && editingCell?.dateIndex === index && editingCell?.field === 'roomsToSell';
+                        const dayName = getDayName(date);
+                        const isSaturday = dayName === 'Sat';
                         
                         return (
                           <div key={`${roomType.id}-rooms-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer",
-                            isClosed && "bg-red-200"
+                            isClosed && "bg-red-200",
+                            isSaturday && "border-r-2 border-r-blue-500"
                           )}>
                             {isEditing ? (
                               <Input
@@ -769,10 +785,13 @@ const Calendar = () => {
                         const dataIndex = getDataIndexForDate(date);
                         const bookedCount = roomType.data.netBooked[dataIndex];
                         const isClosed = isDateClosed(roomType.id, date);
+                        const dayName = getDayName(date);
+                        const isSaturday = dayName === 'Sat';
                         return (
                           <div key={`${roomType.id}-booked-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center",
-                            isClosed && "bg-red-200"
+                            isClosed && "bg-red-200",
+                            isSaturday && "border-r-2 border-r-blue-500"
                           )}>
                             {bookedCount > 0 && (
                               <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
@@ -797,11 +816,14 @@ const Calendar = () => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
                         const isEditing = editingCell?.roomTypeId === roomType.id && editingCell?.dateIndex === index && editingCell?.field === 'rates';
+                        const dayName = getDayName(date);
+                        const isSaturday = dayName === 'Sat';
                         
                         return (
                           <div key={`${roomType.id}-rate-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer",
-                            isClosed && "bg-red-200"
+                            isClosed && "bg-red-200",
+                            isSaturday && "border-r-2 border-r-blue-500"
                           )}>
                             {isEditing ? (
                               <Input
