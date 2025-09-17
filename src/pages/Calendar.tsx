@@ -458,14 +458,7 @@ const Calendar = () => {
                 {/* Standard Rate Row */}
                 <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border last:border-b-0">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
-                    <div className="flex items-center gap-1">
-                      <ChevronDown className="h-4 w-4" />
-                      <span className="text-sm font-medium">Standard Rate</span>
-                    </div>
-                    <div className="mt-1 flex items-center gap-1">
-                      <X className="h-3 w-3" />
-                      <span className="text-xs">2 Edit</span>
-                    </div>
+                    <span className="text-sm font-medium">Standard Rate</span>
                   </div>
                   <div className="h-12">
                     <div className="grid grid-cols-31 h-full">
