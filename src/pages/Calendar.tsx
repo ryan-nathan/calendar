@@ -74,8 +74,7 @@ const Calendar = () => {
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [bulkEditData, setBulkEditData] = useState({
-    fromDate: new Date().toISOString().split('T')[0], // Today
-    toDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+    dateRange: undefined as DateRange | undefined,
     daysOfWeek: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     roomsToSell: "",
     rateType: "Standard Rate",
@@ -437,9 +436,14 @@ const Calendar = () => {
       console.log('Using drag selection dates:', fromDate, toDate);
     } else {
       // Comprehensive bulk edit with form inputs
-      fromDate = new Date(bulkEditData.fromDate);
-      toDate = new Date(bulkEditData.toDate);
-      console.log('Using form dates:', fromDate, toDate);
+      if (bulkEditData.dateRange?.from && bulkEditData.dateRange?.to) {
+        fromDate = bulkEditData.dateRange.from;
+        toDate = bulkEditData.dateRange.to;
+        console.log('Using form dates:', fromDate, toDate);
+      } else {
+        console.log('No date range specified, returning early');
+        return;
+      }
     }
     
     // Build dates directly from range (works for yearly selections too)
@@ -535,10 +539,9 @@ const Calendar = () => {
     return `${startDate.toLocaleDateString('en-GB', formatOptions)} - ${endDate.toLocaleDateString('en-GB', formatOptions)}`;
   };
 
-  const formatDateStringRange = (fromDateStr: string, toDateStr: string) => {
-    const fromDate = new Date(fromDateStr);
-    const toDate = new Date(toDateStr);
-    return `${fromDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} - ${toDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+  const formatDateStringRange = (dateRange?: DateRange) => {
+    if (!dateRange?.from || !dateRange?.to) return "No date range selected";
+    return `${dateRange.from.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} - ${dateRange.to.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
   };
 
   const getCurrentRoomType = () => {
@@ -755,10 +758,18 @@ const Calendar = () => {
                             roomTypeId: roomType.id,
                           });
                         }
+                        // Set default date range for the picker
+                        setBulkEditData(prev => ({
+                          ...prev,
+                          dateRange: {
+                            from: calendarDates[0],
+                            to: calendarDates[calendarDates.length - 1]
+                          }
+                        }));
                       } else {
                         // Reset when closing via UI controls
                         setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
-                        setBulkEditData((prev) => ({ ...prev, roomsToSell: "", price: "" }));
+                        setBulkEditData((prev) => ({ ...prev, dateRange: undefined, roomsToSell: "", price: "" }));
                       }
                     }}>
                       <SheetTrigger asChild>
@@ -773,25 +784,12 @@ const Calendar = () => {
                         
                         <div className="mt-6 space-y-6">
                           {/* Date Range */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="from-date" className="text-sm font-medium">From:</Label>
-                              <Input
-                                id="from-date"
-                                type="date"
-                                value={bulkEditData.fromDate}
-                                onChange={(e) => setBulkEditData(prev => ({ ...prev, fromDate: e.target.value }))}
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="to-date" className="text-sm font-medium">Up to and including:</Label>
-                              <Input
-                                id="to-date"
-                                type="date"
-                                value={bulkEditData.toDate}
-                                onChange={(e) => setBulkEditData(prev => ({ ...prev, toDate: e.target.value }))}
-                                className="mt-1"
+                          <div>
+                            <Label className="text-sm font-medium">Date Range:</Label>
+                            <div className="mt-1">
+                              <DateRangePicker
+                                date={bulkEditData.dateRange}
+                                onDateChange={(dateRange) => setBulkEditData(prev => ({ ...prev, dateRange }))}
                               />
                             </div>
                           </div>
@@ -849,7 +847,7 @@ const Calendar = () => {
                                 </div>
                               </div>
                               <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
+                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.dateRange)}
                               </p>
                               <div className="flex gap-2">
                                 <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
@@ -887,7 +885,7 @@ const Calendar = () => {
                                 onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
                               />
                               <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
+                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.dateRange)}
                               </p>
                               <div className="flex gap-2">
                                 <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
@@ -916,7 +914,7 @@ const Calendar = () => {
                                 </div>
                               </RadioGroup>
                               <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
+                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.dateRange)}
                               </p>
                               <div className="flex gap-2">
                                 <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
@@ -946,7 +944,7 @@ const Calendar = () => {
                                 <span className="mr-1">+</span> Add more
                               </Button>
                               <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
+                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.dateRange)}
                               </p>
                               <div className="flex gap-2">
                                 <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
