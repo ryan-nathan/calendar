@@ -397,12 +397,12 @@ const Calendar = () => {
               <div></div>
               <div className="flex gap-8">
                 {calendarDates.slice(0, 15).some((date, index) => index === 0 || date.getMonth() !== calendarDates[index - 1]?.getMonth()) && (
-                  <h2 className="text-xl font-semibold">
+                  <h2 className="text-sm font-medium">
                     {calendarDates[0]?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </h2>
                 )}
                 {calendarDates.slice(15).some((date, index) => calendarDates[14 + index]?.getMonth() !== calendarDates[14 + index - 1]?.getMonth()) && (
-                  <h2 className="text-xl font-semibold">
+                  <h2 className="text-sm font-medium">
                     {calendarDates.find((date, index) => index > 14 && date.getMonth() !== calendarDates[index - 1]?.getMonth())?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </h2>
                 )}
