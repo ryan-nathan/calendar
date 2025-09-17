@@ -274,18 +274,48 @@ const Calendar = () => {
           }
         }
       } else {
-        // For drag selection of multiple dates, open simple bulk edit dialog
+        // For drag selection of multiple dates
         const startDate = calendarDates[startIndex];
         const endDate = calendarDates[endIndex];
         
         if (startDate && endDate) {
-          setBulkEditSelection({
-            startDate,
-            endDate,
-            roomTypeId: currentDragRoomType
-          });
-          setSelectedRoomType(currentDragRoomType);
-          setSimpleBulkEditOpen(true);
+          if (currentDragCellType === 'status') {
+            // For status cells, directly toggle all dates in range
+            const datesToToggle = [];
+            for (let i = startIndex; i <= endIndex; i++) {
+              const date = calendarDates[i];
+              if (date) {
+                datesToToggle.push(date);
+              }
+            }
+            
+            // Determine if we should open or close based on the first date's current status
+            const firstDateClosed = isDateClosed(currentDragRoomType, startDate);
+            const newStatus = !firstDateClosed; // Toggle the status
+            
+            setClosedDates(prev => {
+              const newClosedDates = { ...prev };
+              if (!newClosedDates[currentDragRoomType]) {
+                newClosedDates[currentDragRoomType] = {};
+              }
+              
+              datesToToggle.forEach(date => {
+                const dateKey = getDateKey(date);
+                newClosedDates[currentDragRoomType][dateKey] = newStatus;
+              });
+              
+              return newClosedDates;
+            });
+          } else {
+            // For rates/rooms cells, open bulk edit dialog
+            setBulkEditSelection({
+              startDate,
+              endDate,
+              roomTypeId: currentDragRoomType
+            });
+            setSelectedRoomType(currentDragRoomType);
+            setSimpleBulkEditOpen(true);
+          }
         }
       }
     }
