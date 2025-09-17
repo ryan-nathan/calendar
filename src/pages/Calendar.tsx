@@ -640,7 +640,7 @@ const Calendar = () => {
                 {/* Room Status Row */}
                 <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
-                    <span className="text-sm font-medium">Room status</span>
+                    <span className="text-xs font-medium">Room status</span>
                   </div>
                   <div className="h-12 relative">
                     {/* Render segments */}
@@ -718,7 +718,7 @@ const Calendar = () => {
                 {/* Rooms to Sell Row */}
                 <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
-                    <span className="text-sm font-medium">Rooms to sell</span>
+                    <span className="text-xs font-medium">Rooms to sell</span>
                   </div>
                   <div className="h-12">
                     <div className="grid grid-cols-31 h-full">
@@ -761,7 +761,7 @@ const Calendar = () => {
                 {/* Net Booked Row */}
                 <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
-                    <span className="text-sm font-medium">Net booked</span>
+                    <span className="text-xs font-medium">Net booked</span>
                   </div>
                   <div className="h-12">
                     <div className="grid grid-cols-31 h-full">
@@ -792,7 +792,7 @@ const Calendar = () => {
                 {/* Standard Rate Row */}
                 <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border last:border-b-0">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
-                    <span className="text-sm font-medium">Standard Rate</span>
+                    <span className="text-xs font-medium">Standard Rate</span>
                   </div>
                   <div className="h-12">
                     <div className="grid grid-cols-31 h-full">
