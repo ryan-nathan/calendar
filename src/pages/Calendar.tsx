@@ -79,6 +79,9 @@ const Calendar = () => {
   // Group dates by month for display
   const septemberDates = calendarDates.filter(date => date.getMonth() === 8);
   const octoberDates = calendarDates.filter(date => date.getMonth() === 9);
+  // Aliases to maintain compatibility with older references
+  const septemberDays = septemberDates;
+  const octoberDays = octoberDates;
 
   const handleDayOfWeekToggle = (day: string) => {
     setBulkEditData(prev => ({
