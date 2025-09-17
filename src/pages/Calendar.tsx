@@ -166,6 +166,39 @@ const Calendar = () => {
     return Object.values(closedDates[roomTypeId] || {}).some(isClosed => isClosed);
   };
 
+  // Create segments of consecutive open/closed dates
+  const createDateSegments = (roomTypeId: string, dates: Date[]) => {
+    const segments: Array<{type: 'open' | 'closed', startIndex: number, endIndex: number, dates: Date[]}> = [];
+    let currentSegment: {type: 'open' | 'closed', startIndex: number, endIndex: number, dates: Date[]} | null = null;
+
+    dates.forEach((date, index) => {
+      const isClosed = isDateClosed(roomTypeId, date);
+      const segmentType = isClosed ? 'closed' : 'open';
+
+      if (!currentSegment || currentSegment.type !== segmentType) {
+        if (currentSegment) {
+          currentSegment.endIndex = index - 1;
+          segments.push(currentSegment);
+        }
+        currentSegment = {
+          type: segmentType,
+          startIndex: index,
+          endIndex: index,
+          dates: [date]
+        };
+      } else {
+        currentSegment.dates.push(date);
+        currentSegment.endIndex = index;
+      }
+    });
+
+    if (currentSegment) {
+      segments.push(currentSegment);
+    }
+
+    return segments;
+  };
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-full mx-auto">
@@ -486,10 +519,31 @@ const Calendar = () => {
                     <span className="text-sm font-medium">Room status</span>
                   </div>
                   <div className="h-12 relative">
-                    {/* Background green bubble - full width */}
-                    <div className="absolute inset-0 mx-2 my-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3">
-                      <span className="text-sm font-medium">Bookable</span>
-                    </div>
+                    {/* Render segments */}
+                    {createDateSegments(roomType.id, calendarDates).map((segment, segmentIndex) => {
+                      const cellWidth = 100 / 31; // Each cell is 1/31 of the width
+                      const leftPercent = (segment.startIndex / 31) * 100;
+                      const widthPercent = ((segment.endIndex - segment.startIndex + 1) / 31) * 100;
+                      
+                      if (segment.type === 'open') {
+                        return (
+                          <div 
+                            key={`segment-${segmentIndex}`}
+                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3"
+                            style={{
+                              left: `${leftPercent}%`,
+                              width: `${widthPercent}%`,
+                              marginLeft: '8px',
+                              marginRight: '8px'
+                            }}
+                          >
+                            {segmentIndex === 0 && <span className="text-sm font-medium">Bookable</span>}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
+                    
                     {/* Clickable overlay cells */}
                     <div className="grid grid-cols-31 h-full relative z-10">
                       {calendarDates.map((date, index) => {
