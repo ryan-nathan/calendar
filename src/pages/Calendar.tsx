@@ -823,7 +823,7 @@ const Calendar = () => {
                               />
                             ) : (
                               <div 
-                                className="text-center flex flex-col items-center justify-center h-full gap-0.5"
+                                className="text-center flex flex-col items-center justify-center h-full gap-px"
                                 onClick={() => handleCellClick(roomType.id, index, 'rates')}
                               >
                                 <span className="text-[10px] text-muted-foreground">THB</span>
