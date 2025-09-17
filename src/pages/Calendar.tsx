@@ -478,8 +478,8 @@ const Calendar = () => {
         </div>
 
         {/* Calendar Grid - Horizontal Scroll Container */}
-        <div className="overflow-hidden">
-          <div className="min-w-auto">
+        <div className="overflow-x-auto">
+          <div className="min-w-[1240px]">
             {/* Month Headers */}
             <div className="grid grid-cols-[220px_1fr] mb-4">
             <div></div>
@@ -508,11 +508,11 @@ const Calendar = () => {
             </div>
           </div>
 
-          {/* Calendar Header - Days and Dates */}
-          <div className="grid grid-cols-[220px_1fr] border border-calendar-grid-border rounded-t-lg overflow-hidden">
-            <div className="bg-muted/50 border-r border-calendar-grid-border"></div>
-            <div className="bg-muted/50">
-              <div className="grid grid-cols-31 h-full">
+            {/* Calendar Header - Days and Dates */}
+            <div className="grid grid-cols-[220px_1fr] border border-calendar-grid-border rounded-t-lg overflow-hidden">
+              <div className="bg-muted/50 border-r border-calendar-grid-border"></div>
+              <div className="bg-muted/50">
+                <div className="grid h-full" style={{gridTemplateColumns: `repeat(31, 32px)`}}>
                 {calendarDates.map((date, index) => {
                   const dayName = getDayName(date);
                   const isSaturday = dayName === 'Sat';
@@ -814,7 +814,7 @@ const Calendar = () => {
                     })}
                     
                     {/* Clickable overlay cells */}
-                    <div className="grid grid-cols-31 h-full relative z-20">
+                    <div className="grid h-full relative z-20" style={{gridTemplateColumns: `repeat(31, 32px)`}}>
                       {calendarDates.map((date, index) => {
                         const inDragRange = isInDragRange(index, roomType.id);
                         const dayName = getDayName(date);
@@ -846,7 +846,7 @@ const Calendar = () => {
                     <span className="text-xs font-medium">Rooms to sell</span>
                   </div>
                   <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
+                    <div className="grid h-full" style={{gridTemplateColumns: `repeat(31, 32px)`}}>
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
@@ -900,7 +900,7 @@ const Calendar = () => {
                     <span className="text-xs font-medium">Net booked</span>
                   </div>
                   <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
+                    <div className="grid h-full" style={{gridTemplateColumns: `repeat(31, 32px)`}}>
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const bookedCount = roomType.data.netBooked[dataIndex];
@@ -931,7 +931,7 @@ const Calendar = () => {
                     <span className="text-xs font-medium">Standard Rate</span>
                   </div>
                   <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
+                    <div className="grid h-full" style={{gridTemplateColumns: `repeat(31, 32px)`}}>
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
