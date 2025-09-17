@@ -522,11 +522,9 @@ const Calendar = () => {
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
-                        const hasClosedDates = hasClosedDatesForRoom(roomType.id);
                         return (
                           <div key={`${roomType.id}-rooms-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer",
-                            hasClosedDates && !isClosed && "bg-red-100",
                             isClosed && "bg-red-200"
                           )}>
                             {roomType.data.roomsToSell[dataIndex]}
@@ -548,11 +546,9 @@ const Calendar = () => {
                         const dataIndex = getDataIndexForDate(date);
                         const bookedCount = roomType.data.netBooked[dataIndex];
                         const isClosed = isDateClosed(roomType.id, date);
-                        const hasClosedDates = hasClosedDatesForRoom(roomType.id);
                         return (
                           <div key={`${roomType.id}-booked-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center",
-                            hasClosedDates && !isClosed && "bg-red-100",
                             isClosed && "bg-red-200"
                           )}>
                             {bookedCount > 0 && (
@@ -577,11 +573,9 @@ const Calendar = () => {
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
-                        const hasClosedDates = hasClosedDatesForRoom(roomType.id);
                         return (
                           <div key={`${roomType.id}-rate-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer",
-                            hasClosedDates && !isClosed && "bg-red-100",
                             isClosed && "bg-red-200"
                           )}>
                             <span className="text-[10px] text-muted-foreground">THB</span>
