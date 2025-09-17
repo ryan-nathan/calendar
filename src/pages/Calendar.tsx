@@ -48,7 +48,7 @@ const Calendar = () => {
   const [currentStartDate, setCurrentStartDate] = useState(new Date(2025, 8, 16)); // Sept 16, 2025
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
-  const [stickyMonths, setStickyMonths] = useState<{[key: string]: { isSticky: boolean, offset: number }}>({});
+  const [stickyMonths, setStickyMonths] = useState<{[key: string]: { isSticky: boolean, offset: number, position: number }}>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monthHeadersRef = useRef<{[key: string]: HTMLDivElement | null}>({});
   const [bulkEditData, setBulkEditData] = useState({
@@ -136,39 +136,52 @@ const Calendar = () => {
       
       const scrollLeft = scrollContainerRef.current.scrollLeft;
       const sidebarWidth = 200; // Width of the sidebar
-      const cellWidth = 48; // Width of each date cell
       
-      const newStickyMonths: {[key: string]: { isSticky: boolean, offset: number }} = {};
+      // Get the actual width of the date grid container
+      const dateGridContainer = scrollContainerRef.current.querySelector('.grid.grid-cols-31');
+      if (!dateGridContainer) return;
+      
+      const dateGridWidth = dateGridContainer.clientWidth;
+      const cellWidth = dateGridWidth / 31; // Actual cell width
+      
+      const newStickyMonths: {[key: string]: { isSticky: boolean, offset: number, position: number }} = {};
       
       monthsInView.forEach((month) => {
         const monthStartPosition = month.firstDayIndex * cellWidth;
         const monthKey = `${month.date.getFullYear()}-${month.date.getMonth()}`;
         
-        // Check if month should be sticky
-        const shouldBeSticky = scrollLeft >= monthStartPosition - sidebarWidth;
+        // Check if month should be sticky (when its start position passes the sidebar)
+        const shouldBeSticky = scrollLeft >= monthStartPosition;
         
-        // Calculate offset for pushing effect
+        // Calculate position and offset for pushing effect
         let offset = 0;
+        let position = sidebarWidth; // Default position after sidebar
+        
         if (shouldBeSticky) {
-          // Find next month
+          // Find next month for pushing effect
           const nextMonthIndex = monthsInView.findIndex(m => 
             `${m.date.getFullYear()}-${m.date.getMonth()}` === monthKey
           ) + 1;
           
           if (nextMonthIndex < monthsInView.length) {
             const nextMonth = monthsInView[nextMonthIndex];
-            const nextMonthStartPosition = nextMonth.firstDayIndex * cellWidth;
-            const currentHeaderRight = scrollLeft + sidebarWidth + 200; // Header width
+            const nextMonthStartPosition = sidebarWidth + nextMonth.firstDayIndex * cellWidth - scrollLeft;
+            const headerWidth = 200; // Approximate header width
             
-            if (currentHeaderRight > nextMonthStartPosition) {
-              offset = nextMonthStartPosition - (scrollLeft + sidebarWidth + 200);
+            // If next month is approaching, start pushing current month
+            if (nextMonthStartPosition < sidebarWidth + headerWidth) {
+              offset = nextMonthStartPosition - (sidebarWidth + headerWidth);
             }
           }
+          
+          // Position relative to current scroll
+          position = Math.max(sidebarWidth, sidebarWidth + monthStartPosition - scrollLeft);
         }
         
         newStickyMonths[monthKey] = {
           isSticky: shouldBeSticky,
-          offset: offset
+          offset: offset,
+          position: position
         };
       });
       
@@ -178,10 +191,13 @@ const Calendar = () => {
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
       scrollContainer.addEventListener('scroll', handleScroll);
+      // Add resize listener to recalculate on window resize
+      window.addEventListener('resize', handleScroll);
       handleScroll(); // Initial calculation
       
       return () => {
         scrollContainer.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleScroll);
       };
     }
   }, [monthsInView]);
@@ -284,9 +300,9 @@ const Calendar = () => {
                 <div
                   key={monthKey}
                   ref={(el) => monthHeadersRef.current[monthKey] = el}
-                  className="absolute top-0 left-0 z-10 bg-background border border-calendar-grid-border rounded-md px-4 py-2 shadow-sm"
+                  className="absolute top-0 z-10 bg-background border border-calendar-grid-border rounded-md px-4 py-2 shadow-sm"
                   style={{
-                    left: `200px`, // After sidebar
+                    left: `${stickyData.position}px`,
                     transform: `translateX(${stickyData.offset}px)`,
                     transition: 'transform 0.1s ease-out'
                   }}
