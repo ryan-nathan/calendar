@@ -887,9 +887,13 @@ const Calendar = () => {
                             isClosed && "bg-red-200",
                             isInDragRange(index, roomType.id) && "bg-blue-200",
                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
-                          )}
-                            onMouseDown={() => handleMouseDown(roomType.id, index)}
-                            onMouseMove={() => handleMouseMove(index)}
+                           )}
+                             onMouseDown={(e) => {
+                               // Don't start dragging if clicking on editable value
+                               if (e.target !== e.currentTarget) return;
+                               handleMouseDown(roomType.id, index);
+                             }}
+                             onMouseMove={() => handleMouseMove(index)}
                             onMouseUp={handleMouseUp}
                             onMouseEnter={() => handleMouseMove(index)}
                           >
@@ -972,9 +976,13 @@ const Calendar = () => {
                             isClosed && "bg-red-200",
                             isInDragRange(index, roomType.id) && "bg-blue-200",
                             isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
-                          )}
-                            onMouseDown={() => handleMouseDown(roomType.id, index)}
-                            onMouseMove={() => handleMouseMove(index)}
+                           )}
+                             onMouseDown={(e) => {
+                               // Don't start dragging if clicking on editable value
+                               if (e.target !== e.currentTarget) return;
+                               handleMouseDown(roomType.id, index);
+                             }}
+                             onMouseMove={() => handleMouseMove(index)}
                             onMouseUp={handleMouseUp}
                             onMouseEnter={() => handleMouseMove(index)}
                           >
