@@ -111,7 +111,7 @@ export const MonthCalendar = ({
   return (
     <div className="bg-white border border-border rounded-lg p-2">
       {/* Month Header */}
-      <h3 className="text-sm font-semibold text-primary mb-2 text-left">
+      <h3 className="text-sm font-semibold mb-2 text-left">
         {monthNames[month]} {year}
       </h3>
 
