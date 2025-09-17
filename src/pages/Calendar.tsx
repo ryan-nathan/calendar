@@ -391,7 +391,7 @@ const Calendar = () => {
         <div className="overflow-hidden">
           <div className="min-w-auto">
           {/* Month Headers */}
-          <div className="grid grid-cols-[200px_1fr] mb-4">
+          <div className="grid grid-cols-[220px_1fr] mb-4">
             <div></div>
             <div className="flex items-center justify-between">
               <div></div>
@@ -447,7 +447,7 @@ const Calendar = () => {
             {roomTypes.map((roomType, roomIndex) => (
               <div key={roomType.id} className="border-x border-b border-calendar-grid-border">
                 {/* Room Type Header */}
-                <div className="grid grid-cols-[200px_1fr] bg-muted/30 border-b border-calendar-grid-border">
+                <div className="grid grid-cols-[220px_1fr] bg-muted/30 border-b border-calendar-grid-border">
                   <div className="p-3 border-r border-calendar-grid-border">
                     <div className="flex items-center justify-between">
                       <h3 className="text-base font-semibold">{roomType.name}</h3>
@@ -654,7 +654,7 @@ const Calendar = () => {
                 </div>
 
                 {/* Room Status Row */}
-                <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border">
+                <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
                     <span className="text-sm font-medium">Room status</span>
                   </div>
@@ -669,7 +669,7 @@ const Calendar = () => {
                         return (
                           <div 
                             key={`segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3"
+                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3 z-30"
                             style={{
                               left: `calc(${leftPercent}% + 8px)`,
                               width: `calc(${widthPercent}% - 16px)`,
@@ -691,7 +691,7 @@ const Calendar = () => {
                         return (
                           <div 
                             key={`closed-segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-red-500 text-white rounded-full flex items-center justify-start pl-3 z-20 pointer-events-none"
+                            className="absolute top-3 bottom-3 bg-red-500 text-white rounded-full flex items-center justify-start pl-3 z-30 pointer-events-none"
                             style={{
                               left: `calc(${leftPercent}% + 8px)`,
                               width: `calc(${widthPercent}% - 16px)`,
@@ -705,7 +705,7 @@ const Calendar = () => {
                     })}
                     
                     {/* Clickable overlay cells */}
-                    <div className="grid grid-cols-31 h-full relative z-10">
+                    <div className="grid grid-cols-31 h-full relative z-20">
                       {calendarDates.map((date, index) => {
                         const inDragRange = isInDragRange(index, roomType.id);
                         const dayName = getDayName(date);
@@ -714,9 +714,9 @@ const Calendar = () => {
                           <div 
                             key={`${roomType.id}-status-${index}`} 
                             className={cn(
-                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center",
+                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
                               inDragRange && "bg-blue-200",
-                              isSaturday && "border-r-2 border-r-blue-500"
+                              isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                             )}
                             onMouseDown={() => handleMouseDown(roomType.id, index)}
                             onMouseMove={() => handleMouseMove(index)}
@@ -732,7 +732,7 @@ const Calendar = () => {
                 </div>
 
                 {/* Rooms to Sell Row */}
-                <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border">
+                <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
                     <span className="text-sm font-medium">Rooms to sell</span>
                   </div>
@@ -747,9 +747,9 @@ const Calendar = () => {
                         
                         return (
                           <div key={`${roomType.id}-rooms-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer",
+                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer relative",
                             isClosed && "bg-red-200",
-                            isSaturday && "border-r-2 border-r-blue-500"
+                            isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                           )}>
                             {isEditing ? (
                               <Input
@@ -775,7 +775,7 @@ const Calendar = () => {
                 </div>
 
                 {/* Net Booked Row */}
-                <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border">
+                <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
                     <span className="text-sm font-medium">Net booked</span>
                   </div>
@@ -789,9 +789,9 @@ const Calendar = () => {
                         const isSaturday = dayName === 'Sat';
                         return (
                           <div key={`${roomType.id}-booked-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center",
+                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center relative",
                             isClosed && "bg-red-200",
-                            isSaturday && "border-r-2 border-r-blue-500"
+                            isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                           )}>
                             {bookedCount > 0 && (
                               <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
@@ -806,7 +806,7 @@ const Calendar = () => {
                 </div>
 
                 {/* Standard Rate Row */}
-                <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border last:border-b-0">
+                <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border last:border-b-0">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
                     <span className="text-sm font-medium">Standard Rate</span>
                   </div>
@@ -821,9 +821,9 @@ const Calendar = () => {
                         
                         return (
                           <div key={`${roomType.id}-rate-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer",
+                            "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer relative",
                             isClosed && "bg-red-200",
-                            isSaturday && "border-r-2 border-r-blue-500"
+                            isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                           )}>
                             {isEditing ? (
                               <Input
