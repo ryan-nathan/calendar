@@ -89,7 +89,7 @@ const Calendar = () => {
     roomTypeId: null
   });
   const [currentView, setCurrentView] = useState<"list-view" | "yearly-view">("list-view");
-  const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("superior");
+  const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("all-rooms");
   const [syncInfoDialogOpen, setSyncInfoDialogOpen] = useState(false);
 
   const getCurrentSyncTime = () => {
@@ -540,9 +540,10 @@ const Calendar = () => {
             <div className="flex items-center gap-4">
               <Select value={selectedRoomTypeFilter} onValueChange={setSelectedRoomTypeFilter}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Select room type" />
+                  <SelectValue placeholder="All rooms" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all-rooms">All rooms</SelectItem>
                   <SelectItem value="superior">Superior Room</SelectItem>
                   <SelectItem value="deluxe-balcony">Deluxe Room with Balcony</SelectItem>
                   <SelectItem value="deluxe-oasis">Deluxe Oasis Ground Floor</SelectItem>
@@ -598,7 +599,7 @@ const Calendar = () => {
           <YearlyView 
             roomTypes={roomTypes}
             closedDates={closedDates}
-            selectedRoomTypeFilter={selectedRoomTypeFilter}
+            selectedRoomTypeFilter={selectedRoomTypeFilter === "all-rooms" ? "superior" : selectedRoomTypeFilter}
             baseDataDate={BASE_DATA_DATE}
             onDateClick={(date) => {
               // Handle date click in yearly view - could open bulk edit or navigate
@@ -704,7 +705,7 @@ const Calendar = () => {
           {/* Room Types */}
           <div className="space-y-0">
             {roomTypes
-              .filter(roomType => roomType.id === selectedRoomTypeFilter)
+              .filter(roomType => selectedRoomTypeFilter === "all-rooms" || roomType.id === selectedRoomTypeFilter)
               .map((roomType, roomIndex, filteredArray) => (
               <div key={roomType.id} className={cn(
                 "border-x border-b border-calendar-grid-border",

@@ -67,7 +67,7 @@ export const MonthCalendar = ({
       return 'available';
     }
     
-    // Check specific room type
+    // Check specific room type (yearly view always shows individual room types)
     const roomType = roomTypes.find(rt => rt.id === selectedRoomType);
     if (!roomType) return 'available';
     
