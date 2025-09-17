@@ -385,6 +385,12 @@ const Calendar = () => {
     return `${startDate.toLocaleDateString('en-GB', formatOptions)} - ${endDate.toLocaleDateString('en-GB', formatOptions)}`;
   };
 
+  const formatDateStringRange = (fromDateStr: string, toDateStr: string) => {
+    const fromDate = new Date(fromDateStr);
+    const toDate = new Date(toDateStr);
+    return `${fromDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })} - ${toDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
+  };
+
   const getCurrentRoomType = () => {
     return roomTypes.find(rt => rt.id === bulkEditSelection.roomTypeId);
   };
@@ -628,7 +634,7 @@ const Calendar = () => {
                                 </div>
                               </div>
                               <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {bulkEditData.fromDate} - {bulkEditData.toDate}
+                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
                               </p>
                               <div className="flex gap-2">
                                 <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
@@ -666,7 +672,7 @@ const Calendar = () => {
                                 onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
                               />
                               <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {bulkEditData.fromDate} - {bulkEditData.toDate}
+                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
                               </p>
                               <div className="flex gap-2">
                                 <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
@@ -695,7 +701,7 @@ const Calendar = () => {
                                 </div>
                               </RadioGroup>
                               <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {bulkEditData.fromDate} - {bulkEditData.toDate}
+                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
                               </p>
                               <div className="flex gap-2">
                                 <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
@@ -725,7 +731,7 @@ const Calendar = () => {
                                 <span className="mr-1">+</span> Add more
                               </Button>
                               <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {bulkEditData.fromDate} - {bulkEditData.toDate}
+                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
                               </p>
                               <div className="flex gap-2">
                                 <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
