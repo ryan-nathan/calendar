@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,9 @@ const Calendar = () => {
   const [currentStartDate, setCurrentStartDate] = useState(new Date(2025, 8, 16)); // Sept 16, 2025
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
+  const [stickyMonths, setStickyMonths] = useState<{[key: string]: { isSticky: boolean, offset: number }}>({});
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const monthHeadersRef = useRef<{[key: string]: HTMLDivElement | null}>({});
   const [bulkEditData, setBulkEditData] = useState({
     fromDate: "2025-09-16",
     toDate: "2025-10-16",
@@ -107,6 +110,81 @@ const Calendar = () => {
     newDate.setDate(newDate.getDate() + 7);
     setCurrentStartDate(newDate);
   };
+
+  // Get unique months from calendar dates
+  const getMonthsInView = () => {
+    const months = new Map();
+    calendarDates.forEach((date, index) => {
+      const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+      if (!months.has(monthKey)) {
+        months.set(monthKey, {
+          name: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          firstDayIndex: index,
+          date: date
+        });
+      }
+    });
+    return Array.from(months.values());
+  };
+
+  const monthsInView = getMonthsInView();
+
+  // Calculate sticky positions based on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!scrollContainerRef.current) return;
+      
+      const scrollLeft = scrollContainerRef.current.scrollLeft;
+      const sidebarWidth = 200; // Width of the sidebar
+      const cellWidth = 48; // Width of each date cell
+      
+      const newStickyMonths: {[key: string]: { isSticky: boolean, offset: number }} = {};
+      
+      monthsInView.forEach((month) => {
+        const monthStartPosition = month.firstDayIndex * cellWidth;
+        const monthKey = `${month.date.getFullYear()}-${month.date.getMonth()}`;
+        
+        // Check if month should be sticky
+        const shouldBeSticky = scrollLeft >= monthStartPosition - sidebarWidth;
+        
+        // Calculate offset for pushing effect
+        let offset = 0;
+        if (shouldBeSticky) {
+          // Find next month
+          const nextMonthIndex = monthsInView.findIndex(m => 
+            `${m.date.getFullYear()}-${m.date.getMonth()}` === monthKey
+          ) + 1;
+          
+          if (nextMonthIndex < monthsInView.length) {
+            const nextMonth = monthsInView[nextMonthIndex];
+            const nextMonthStartPosition = nextMonth.firstDayIndex * cellWidth;
+            const currentHeaderRight = scrollLeft + sidebarWidth + 200; // Header width
+            
+            if (currentHeaderRight > nextMonthStartPosition) {
+              offset = nextMonthStartPosition - (scrollLeft + sidebarWidth + 200);
+            }
+          }
+        }
+        
+        newStickyMonths[monthKey] = {
+          isSticky: shouldBeSticky,
+          offset: offset
+        };
+      });
+      
+      setStickyMonths(newStickyMonths);
+    };
+
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+      handleScroll(); // Initial calculation
+      
+      return () => {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, [monthsInView]);
   
   // Group dates by month for display
   const septemberDates = calendarDates.filter(date => date.getMonth() === 8);
@@ -191,8 +269,36 @@ const Calendar = () => {
         </div>
 
         {/* Calendar Grid - Horizontal Scroll Container */}
-        <div className="overflow-hidden">
+        <div ref={scrollContainerRef} className="overflow-x-auto relative">
           <div className="min-w-auto">
+          
+          {/* Sticky Month Headers */}
+          <div className="relative">
+            {monthsInView.map((month) => {
+              const monthKey = `${month.date.getFullYear()}-${month.date.getMonth()}`;
+              const stickyData = stickyMonths[monthKey];
+              
+              if (!stickyData?.isSticky) return null;
+              
+              return (
+                <div
+                  key={monthKey}
+                  ref={(el) => monthHeadersRef.current[monthKey] = el}
+                  className="absolute top-0 left-0 z-10 bg-background border border-calendar-grid-border rounded-md px-4 py-2 shadow-sm"
+                  style={{
+                    left: `200px`, // After sidebar
+                    transform: `translateX(${stickyData.offset}px)`,
+                    transition: 'transform 0.1s ease-out'
+                  }}
+                >
+                  <h2 className="text-lg font-semibold whitespace-nowrap">
+                    {month.name}
+                  </h2>
+                </div>
+              );
+            })}
+          </div>
+
           {/* Month Headers */}
           <div className="grid grid-cols-[200px_1fr] mb-4">
             <div></div>
@@ -201,16 +307,11 @@ const Calendar = () => {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div className="flex gap-8">
-                {calendarDates.slice(0, 15).some((date, index) => index === 0 || date.getMonth() !== calendarDates[index - 1]?.getMonth()) && (
-                  <h2 className="text-xl font-semibold">
-                    {calendarDates[0]?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                {monthsInView.map((month) => (
+                  <h2 key={`${month.date.getFullYear()}-${month.date.getMonth()}`} className="text-xl font-semibold opacity-20">
+                    {month.name}
                   </h2>
-                )}
-                {calendarDates.slice(15).some((date, index) => calendarDates[14 + index]?.getMonth() !== calendarDates[14 + index - 1]?.getMonth()) && (
-                  <h2 className="text-xl font-semibold">
-                    {calendarDates.find((date, index) => index > 14 && date.getMonth() !== calendarDates[index - 1]?.getMonth())?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                  </h2>
-                )}
+                ))}
               </div>
               <Button variant="ghost" size="sm" onClick={handleNextWeek}>
                 <ChevronRight className="h-4 w-4" />
