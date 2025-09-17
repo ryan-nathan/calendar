@@ -1113,6 +1113,17 @@ const Calendar = () => {
               </RadioGroup>
             </div>
 
+            {/* Rooms to sell */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Rooms to sell</Label>
+              <Input
+                type="number"
+                placeholder="Number of rooms"
+                value={bulkEditData.roomsToSell}
+                onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
+              />
+            </div>
+
             {/* Price */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Price</Label>
@@ -1128,17 +1139,6 @@ const Calendar = () => {
                   className="flex-1"
                 />
               </div>
-            </div>
-
-            {/* Rooms to sell */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Rooms to sell</Label>
-              <Input
-                type="number"
-                placeholder="Number of rooms"
-                value={bulkEditData.roomsToSell}
-                onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
-              />
             </div>
 
             {/* Action Buttons */}
