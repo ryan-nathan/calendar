@@ -520,11 +520,22 @@ const Calendar = () => {
                     </div>
                   </div>
                   <div className="p-3 flex justify-end">
-                    <Sheet open={bulkEditOpen && selectedRoomType === roomType.id && bulkEditSelection.roomTypeId === roomType.id} onOpenChange={(open) => {
-                      if (!open) {
-                        setBulkEditOpen(false);
+                    <Sheet open={bulkEditOpen && selectedRoomType === roomType.id} onOpenChange={(open) => {
+                      setBulkEditOpen(open);
+                      if (open) {
+                        setSelectedRoomType(roomType.id);
+                        // If no selection yet, default to the visible range
+                        if (!bulkEditSelection.startDate || !bulkEditSelection.endDate) {
+                          setBulkEditSelection({
+                            startDate: calendarDates[0],
+                            endDate: calendarDates[calendarDates.length - 1],
+                            roomTypeId: roomType.id,
+                          });
+                        }
+                      } else {
+                        // Reset when closing via UI controls
                         setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
-                        setBulkEditData(prev => ({ ...prev, roomsToSell: "", price: "" }));
+                        setBulkEditData((prev) => ({ ...prev, roomsToSell: "", price: "" }));
                       }
                     }}>
                       <SheetTrigger asChild>
@@ -605,7 +616,7 @@ const Calendar = () => {
 
                           {/* Action Buttons */}
                           <div className="flex gap-3 pt-4">
-                            <Button onClick={handleBulkEditSave} className="flex-1 bg-gray-600 hover:bg-gray-700 text-white">
+                            <Button onClick={handleBulkEditSave} className="flex-1">
                               Save
                             </Button>
                             <Button 
