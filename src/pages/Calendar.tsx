@@ -499,6 +499,7 @@ const Calendar = () => {
             roomTypes={roomTypes}
             closedDates={closedDates}
             selectedRoomTypeFilter={selectedRoomTypeFilter}
+            baseDataDate={BASE_DATA_DATE}
             onDateClick={(date) => {
               // Handle date click in yearly view - could open bulk edit or navigate
               console.log('Date clicked:', date);

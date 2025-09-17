@@ -17,6 +17,7 @@ interface YearlyViewProps {
   }>;
   closedDates: {[roomTypeId: string]: {[dateKey: string]: boolean}};
   selectedRoomTypeFilter: string;
+  baseDataDate: Date;
   onDateClick?: (date: Date) => void;
 }
 
@@ -24,6 +25,7 @@ export const YearlyView = ({
   roomTypes, 
   closedDates, 
   selectedRoomTypeFilter,
+  baseDataDate,
   onDateClick 
 }: YearlyViewProps) => {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -86,6 +88,8 @@ export const YearlyView = ({
             month={month}
             closedDates={closedDates}
             selectedRoomType={selectedRoomTypeFilter}
+            roomTypes={roomTypes}
+            baseDataDate={baseDataDate}
             onDateClick={onDateClick}
           />
         ))}
@@ -98,8 +102,12 @@ export const YearlyView = ({
           <span>Today</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-red-100 border border-red-200 rounded"></div>
-          <span>Closed</span>
+          <div className="w-3 h-3 bg-green-200 border border-green-300 rounded"></div>
+          <span>Bookable</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 bg-red-200 border border-red-300 rounded"></div>
+          <span>Sold out / Closed</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-white border rounded"></div>

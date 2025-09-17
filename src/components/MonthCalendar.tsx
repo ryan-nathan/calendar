@@ -5,6 +5,17 @@ interface MonthCalendarProps {
   month: number; // 0-based (0 = January)
   closedDates: {[roomTypeId: string]: {[dateKey: string]: boolean}};
   selectedRoomType: string;
+  roomTypes: Array<{
+    id: string;
+    name: string;
+    data: {
+      status: string;
+      roomsToSell: number[];
+      netBooked: number[];
+      rates: number[];
+    };
+  }>;
+  baseDataDate: Date;
   onDateClick?: (date: Date) => void;
 }
 
@@ -13,6 +24,8 @@ export const MonthCalendar = ({
   month, 
   closedDates, 
   selectedRoomType,
+  roomTypes,
+  baseDataDate,
   onDateClick 
 }: MonthCalendarProps) => {
   const monthNames = [
@@ -26,9 +39,52 @@ export const MonthCalendar = ({
     return date.toISOString().split('T')[0];
   };
 
+  const getDataIndexForDate = (date: Date): number => {
+    const daysDiff = Math.floor((date.getTime() - baseDataDate.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.max(0, Math.min(30, daysDiff)); // Clamp to valid array indices
+  };
+
   const isDateClosed = (date: Date) => {
     const dateKey = getDateKey(date);
     return closedDates[selectedRoomType]?.[dateKey] || false;
+  };
+
+  const getDateAvailabilityStatus = (date: Date) => {
+    if (isDateClosed(date)) return 'closed';
+    
+    // If "all-rooms" is selected, check availability across all room types
+    if (selectedRoomType === 'all-rooms') {
+      let hasBookable = false;
+      let hasSoldOut = false;
+      
+      roomTypes.forEach(roomType => {
+        const dataIndex = getDataIndexForDate(date);
+        const roomsToSell = roomType.data.roomsToSell[dataIndex] || 0;
+        const netBooked = roomType.data.netBooked[dataIndex] || 0;
+        const available = roomsToSell - netBooked;
+        
+        if (available > 0) hasBookable = true;
+        if (available <= 0) hasSoldOut = true;
+      });
+      
+      if (hasBookable && !hasSoldOut) return 'bookable';
+      if (hasSoldOut && !hasBookable) return 'sold-out';
+      return 'mixed'; // Some rooms available, some sold out
+    } else {
+      // Check specific room type
+      const roomType = roomTypes.find(rt => rt.id === selectedRoomType);
+      if (!roomType) return 'available';
+      
+      const dataIndex = getDataIndexForDate(date);
+      const roomsToSell = roomType.data.roomsToSell[dataIndex] || 0;
+      const netBooked = roomType.data.netBooked[dataIndex] || 0;
+      const available = roomsToSell - netBooked;
+      
+      if (available > 0) return 'bookable';
+      if (available <= 0) return 'sold-out';
+    }
+    
+    return 'available';
   };
 
   // Get first day of month and number of days
@@ -94,7 +150,10 @@ export const MonthCalendar = ({
                   "w-6 h-6 flex items-center justify-center text-[10px] border border-transparent cursor-pointer hover:border-border transition-colors",
                   date && "hover:bg-muted/50",
                   date && isToday(date) && "bg-accent text-accent-foreground font-semibold",
-                  date && isDateClosed(date) && "bg-red-100 text-red-800",
+                  date && getDateAvailabilityStatus(date) === 'closed' && "bg-red-200 text-red-900",
+                  date && getDateAvailabilityStatus(date) === 'bookable' && "bg-green-200 text-green-900",
+                  date && getDateAvailabilityStatus(date) === 'sold-out' && "bg-red-200 text-red-900",
+                  date && getDateAvailabilityStatus(date) === 'mixed' && "bg-yellow-200 text-yellow-900",
                   !date && "cursor-default"
                 )}
                 onClick={() => date && onDateClick?.(date)}
