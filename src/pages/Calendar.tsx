@@ -1384,7 +1384,7 @@ const Calendar = () => {
                             />
                             {/* Label only at segment start so it doesn't repeat */}
                             {isStart && (
-                              <span className="pointer-events-none text-xs font-medium z-40 px-3 text-white">
+                              <span className="pointer-events-none text-xs font-medium z-40 pl-[10px] pr-3 text-white whitespace-nowrap overflow-hidden text-ellipsis">
                                 {isClosed ? "Rate Closed" : "Bookable"}
                               </span>
                             )}
