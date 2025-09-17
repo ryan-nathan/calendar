@@ -156,8 +156,9 @@ export const MonthCalendar = ({
                 className={cn(
                   "h-6 flex items-center justify-center text-[10px] cursor-pointer hover:bg-muted/50 transition-colors",
                   date && isToday(date) && "bg-accent text-accent-foreground font-bold",
-                  date && shouldHighlightDate(date) && (getDateAvailabilityStatus(date) === 'closed' || getDateAvailabilityStatus(date) === 'sold-out') && "bg-red-200 text-red-900",
+                  date && shouldHighlightDate(date) && getDateAvailabilityStatus(date) === 'closed' && "bg-red-200 text-red-900",
                   date && shouldHighlightDate(date) && getDateAvailabilityStatus(date) === 'bookable' && "bg-green-200 text-green-900",
+                  date && shouldHighlightDate(date) && getDateAvailabilityStatus(date) === 'sold-out' && "bg-red-200 text-red-900",
                   date && !shouldHighlightDate(date) && "bg-white text-muted-foreground",
                   date && isInDragRange && isInDragRange(month, year, date.getDate()) && "bg-blue-200",
                   !date && "cursor-default bg-muted/10"
