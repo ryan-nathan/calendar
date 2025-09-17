@@ -565,6 +565,15 @@ const Calendar = () => {
               console.log('Date clicked:', date);
             }}
             onToggleDateStatus={toggleDateStatus}
+            onOpenBulkEdit={(startDate, endDate, roomTypeId) => {
+              setBulkEditSelection({
+                startDate,
+                endDate,
+                roomTypeId
+              });
+              setSelectedRoomType(roomTypeId);
+              setSimpleBulkEditOpen(true);
+            }}
           />
         ) : (
           <React.Fragment>

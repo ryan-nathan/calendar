@@ -20,6 +20,7 @@ interface YearlyViewProps {
   baseDataDate: Date;
   onDateClick?: (date: Date) => void;
   onToggleDateStatus?: (roomTypeId: string, date: Date) => void;
+  onOpenBulkEdit?: (startDate: Date, endDate: Date, roomTypeId: string) => void;
 }
 
 export const YearlyView = ({ 
@@ -28,7 +29,8 @@ export const YearlyView = ({
   selectedRoomTypeFilter,
   baseDataDate,
   onDateClick,
-  onToggleDateStatus 
+  onToggleDateStatus,
+  onOpenBulkEdit
 }: YearlyViewProps) => {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [dateFilter, setDateFilter] = useState("all-dates");
@@ -80,13 +82,14 @@ export const YearlyView = ({
       
       // If it's a single click (same date)
       if (startDate.getTime() === endDate.getTime()) {
-        toggleDateStatus(selectedRoomTypeFilter, startDate);
+        // Single click toggles status immediately
+        if (onToggleDateStatus) {
+          onToggleDateStatus(selectedRoomTypeFilter, startDate);
+        }
       } else {
-        // Toggle all dates in range
-        const currentDate = new Date(actualStart);
-        while (currentDate <= actualEnd) {
-          toggleDateStatus(selectedRoomTypeFilter, new Date(currentDate));
-          currentDate.setDate(currentDate.getDate() + 1);
+        // Multiple dates selected - open bulk edit sidebar
+        if (onOpenBulkEdit) {
+          onOpenBulkEdit(actualStart, actualEnd, selectedRoomTypeFilter);
         }
       }
     }
