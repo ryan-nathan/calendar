@@ -545,7 +545,7 @@ const Calendar = () => {
                           Bulk edit
                         </Button>
                       </SheetTrigger>
-                      <SheetContent className="w-[400px] sm:w-[400px]">
+                      <SheetContent className="w-[500px] sm:w-[500px]">
                         <SheetHeader>
                           <div className="flex items-center justify-between">
                             <SheetTitle className="text-xl font-semibold">Bulk edit</SheetTitle>
@@ -585,7 +585,7 @@ const Calendar = () => {
                             <Label className="text-sm font-medium mb-3 block">
                               Which days of the week do you want to apply changes to?
                             </Label>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-wrap gap-2">
                               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
                                 <div key={day} className="flex items-center space-x-2">
                                   <Checkbox
