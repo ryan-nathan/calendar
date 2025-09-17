@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/DateRangePicker";
 import { DateRange } from "react-day-picker";
 import { YearlyView } from "@/components/YearlyView";
+import { useToast } from "@/hooks/use-toast";
 
 // Base date for data arrays (today's date)
 const BASE_DATA_DATE = new Date();
@@ -58,6 +59,7 @@ const getDataIndexForDate = (date: Date): number => {
 };
 
 const Calendar = () => {
+  const { toast } = useToast();
   const [roomTypes, setRoomTypes] = useState(initialRoomTypes);
   const [currentStartDate, setCurrentStartDate] = useState(new Date()); // Today
   const [dateRangeSelection, setDateRangeSelection] = useState<DateRange | undefined>();
@@ -93,6 +95,7 @@ const Calendar = () => {
   const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("all-rooms");
   const [lastIndividualRoomType, setLastIndividualRoomType] = useState("superior");
   const [syncInfoDialogOpen, setSyncInfoDialogOpen] = useState(false);
+  const [previousRoomTypesState, setPreviousRoomTypesState] = useState<typeof initialRoomTypes | null>(null);
 
   const getCurrentSyncTime = () => {
     const now = new Date();
@@ -213,6 +216,9 @@ const Calendar = () => {
   };
 
   const toggleDateStatus = (roomTypeId: string, date: Date) => {
+    // Save current state before making changes
+    saveCurrentState();
+    
     const dateKey = getDateKey(date);
     setClosedDates(prev => ({
       ...prev,
@@ -391,6 +397,9 @@ const Calendar = () => {
   const handleSaveEdit = () => {
     if (!editingCell) return;
     
+    // Save current state before making changes
+    saveCurrentState();
+    
     const { roomTypeId, dateIndex, field } = editingCell;
     const dataIndex = getDataIndexForDate(calendarDates[dateIndex]);
     const numValue = parseInt(editValue);
@@ -424,7 +433,27 @@ const Calendar = () => {
     }
   };
 
+  // Save current state before making changes
+  const saveCurrentState = () => {
+    setPreviousRoomTypesState(JSON.parse(JSON.stringify(roomTypes)));
+  };
+
+  // Undo function to revert to previous state
+  const handleUndo = () => {
+    if (previousRoomTypesState) {
+      setRoomTypes(previousRoomTypesState);
+      setPreviousRoomTypesState(null);
+      toast({
+        title: "Changes reverted",
+        description: "Your data has been restored to the previous state.",
+      });
+    }
+  };
+
   const handleBulkEditSave = () => {
+    // Save current state before making changes
+    saveCurrentState();
+    
     console.log('handleBulkEditSave called', { bulkEditSelection, bulkEditData });
     
     // For comprehensive bulk edit (with form inputs), use form dates
@@ -602,15 +631,27 @@ const Calendar = () => {
               </div>
             </div>
             
-            <Select value={currentView} onValueChange={handleViewChange}>
-              <SelectTrigger className="w-[120px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="list-view">List view</SelectItem>
-                <SelectItem value="yearly-view">Yearly view</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Select value={currentView} onValueChange={handleViewChange}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="list-view">List view</SelectItem>
+                  <SelectItem value="yearly-view">Yearly view</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleUndo}
+                disabled={!previousRoomTypesState}
+                className="px-3"
+              >
+                Undo
+              </Button>
+            </div>
           </div>
 
           {/* Date Range and Restrictions - Only show in list view */}
