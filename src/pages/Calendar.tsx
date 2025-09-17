@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/DateRangePicker";
@@ -88,6 +89,7 @@ const Calendar = () => {
   });
   const [currentView, setCurrentView] = useState<"list-view" | "yearly-view">("list-view");
   const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("all-rooms");
+  const [syncInfoDialogOpen, setSyncInfoDialogOpen] = useState(false);
 
   const getCurrentSyncTime = () => {
     const now = new Date();
@@ -471,7 +473,12 @@ const Calendar = () => {
               
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span>Last sync: {getCurrentSyncTime()}</span>
-                <Button variant="link" size="sm" className="h-auto p-0 text-primary">
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="h-auto p-0 text-primary"
+                  onClick={() => setSyncInfoDialogOpen(true)}
+                >
                   Learn more
                 </Button>
               </div>
@@ -1123,7 +1130,39 @@ const Calendar = () => {
           </div>
         </SheetContent>
       </Sheet>
-      </div>
+
+      {/* Sync Info Dialog */}
+      <Dialog open={syncInfoDialogOpen} onOpenChange={setSyncInfoDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Sync Information</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                <strong>Last sync with your connectivity provider:</strong>
+              </p>
+              <p className="text-sm">
+                {getCurrentSyncTime()}
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Depending on the response time between your provider (SiteMinder) and Viridianphuket.com, updates may take a while to sync.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setSyncInfoDialogOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
     </div>
   );
 };
