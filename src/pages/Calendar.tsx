@@ -593,7 +593,7 @@ const Calendar = () => {
                         return (
                           <div 
                             key={`segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-center"
+                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3"
                             style={{
                               left: `calc(${leftPercent}% + 8px)`,
                               width: `calc(${widthPercent}% - 16px)`,
@@ -615,7 +615,7 @@ const Calendar = () => {
                         return (
                           <div 
                             key={`closed-segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-red-500 text-white rounded-full flex items-center justify-center z-20"
+                            className="absolute top-3 bottom-3 bg-red-500 text-white rounded-full flex items-center justify-start pl-3 z-20"
                             style={{
                               left: `calc(${leftPercent}% + 8px)`,
                               width: `calc(${widthPercent}% - 16px)`,
