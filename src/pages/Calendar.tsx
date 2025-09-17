@@ -60,7 +60,6 @@ const getDataIndexForDate = (date: Date): number => {
 const Calendar = () => {
   const [roomTypes, setRoomTypes] = useState(initialRoomTypes);
   const [currentStartDate, setCurrentStartDate] = useState(new Date()); // Today
-  const calendarGridRef = useRef<HTMLDivElement>(null);
   const [dateRangeSelection, setDateRangeSelection] = useState<DateRange | undefined>();
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [simpleBulkEditOpen, setSimpleBulkEditOpen] = useState(false);
@@ -167,40 +166,12 @@ const Calendar = () => {
     const newDate = new Date(currentStartDate);
     newDate.setDate(newDate.getDate() - 7);
     setCurrentStartDate(newDate);
-    
-    // Add smooth horizontal scroll effect
-    if (calendarGridRef.current) {
-      calendarGridRef.current.scrollBy({
-        left: -200,
-        behavior: 'smooth'
-      });
-      // Reset scroll position after animation
-      setTimeout(() => {
-        if (calendarGridRef.current) {
-          calendarGridRef.current.scrollLeft = 0;
-        }
-      }, 300);
-    }
   };
 
   const handleNextWeek = () => {
     const newDate = new Date(currentStartDate);
     newDate.setDate(newDate.getDate() + 7);
     setCurrentStartDate(newDate);
-    
-    // Add smooth horizontal scroll effect
-    if (calendarGridRef.current) {
-      calendarGridRef.current.scrollBy({
-        left: 200,
-        behavior: 'smooth'
-      });
-      // Reset scroll position after animation
-      setTimeout(() => {
-        if (calendarGridRef.current) {
-          calendarGridRef.current.scrollLeft = 0;
-        }
-      }, 300);
-    }
   };
 
   // Handle date range picker changes
@@ -696,7 +667,7 @@ const Calendar = () => {
           <React.Fragment>
         {/* Calendar Grid - Horizontal Scroll Container */}
         <div className="overflow-hidden">
-          <div className="min-w-auto" ref={calendarGridRef}>
+          <div className="min-w-auto">
           {/* Month Headers */}
           <div className="grid grid-cols-[220px_1fr] mb-4 relative">
             <div></div>
