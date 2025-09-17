@@ -57,6 +57,7 @@ const Calendar = () => {
   const [currentStartDate, setCurrentStartDate] = useState(new Date(2025, 8, 16)); // Sept 16, 2025
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
+  const [closedDates, setClosedDates] = useState<{[roomTypeId: string]: {[dateKey: string]: boolean}}>({});
   const [bulkEditData, setBulkEditData] = useState({
     fromDate: "2025-09-16",
     toDate: "2025-10-16",
@@ -139,6 +140,30 @@ const Calendar = () => {
 
   const getDateNumber = (date: Date) => {
     return date.getDate();
+  };
+
+  const getDateKey = (date: Date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+  const toggleDateStatus = (roomTypeId: string, date: Date) => {
+    const dateKey = getDateKey(date);
+    setClosedDates(prev => ({
+      ...prev,
+      [roomTypeId]: {
+        ...prev[roomTypeId],
+        [dateKey]: !prev[roomTypeId]?.[dateKey]
+      }
+    }));
+  };
+
+  const isDateClosed = (roomTypeId: string, date: Date) => {
+    const dateKey = getDateKey(date);
+    return closedDates[roomTypeId]?.[dateKey] || false;
+  };
+
+  const hasClosedDatesForRoom = (roomTypeId: string) => {
+    return Object.values(closedDates[roomTypeId] || {}).some(isClosed => isClosed);
   };
 
   return (
@@ -459,17 +484,30 @@ const Calendar = () => {
                 <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border">
                   <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
                     <span className="text-sm font-medium">Room status</span>
-                    <div className="mt-1">
-                      <span className="inline-block px-2 py-1 bg-calendar-bookable text-calendar-bookable-foreground text-xs rounded">
-                        Bookable
-                      </span>
-                    </div>
                   </div>
-                  <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
-                      {calendarDates.map((date, index) => (
-                        <div key={`${roomType.id}-status-${index}`} className="border-r border-calendar-grid-border last:border-r-0 bg-calendar-bookable hover:bg-calendar-bookable/80 cursor-pointer"></div>
-                      ))}
+                  <div className="h-12 relative">
+                    {/* Background green bar */}
+                    <div className="absolute inset-0 bg-green-100 flex items-center justify-center">
+                      <span className="text-sm font-medium text-green-800">Bookable</span>
+                    </div>
+                    {/* Clickable overlay cells */}
+                    <div className="grid grid-cols-31 h-full relative z-10">
+                      {calendarDates.map((date, index) => {
+                        const isClosed = isDateClosed(roomType.id, date);
+                        return (
+                          <div 
+                            key={`${roomType.id}-status-${index}`} 
+                            className="border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center"
+                            onClick={() => toggleDateStatus(roomType.id, date)}
+                          >
+                            {isClosed && (
+                              <div className="w-16 h-6 bg-red-500 text-white rounded-full flex items-center justify-center">
+                                <span className="text-xs font-medium">Rate Closed</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -483,8 +521,14 @@ const Calendar = () => {
                     <div className="grid grid-cols-31 h-full">
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
+                        const isClosed = isDateClosed(roomType.id, date);
+                        const hasClosedDates = hasClosedDatesForRoom(roomType.id);
                         return (
-                          <div key={`${roomType.id}-rooms-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer">
+                          <div key={`${roomType.id}-rooms-${index}`} className={cn(
+                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer",
+                            hasClosedDates && !isClosed && "bg-red-100",
+                            isClosed && "bg-red-200"
+                          )}>
                             {roomType.data.roomsToSell[dataIndex]}
                           </div>
                         );
@@ -503,8 +547,14 @@ const Calendar = () => {
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const bookedCount = roomType.data.netBooked[dataIndex];
+                        const isClosed = isDateClosed(roomType.id, date);
+                        const hasClosedDates = hasClosedDatesForRoom(roomType.id);
                         return (
-                          <div key={`${roomType.id}-booked-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center">
+                          <div key={`${roomType.id}-booked-${index}`} className={cn(
+                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center",
+                            hasClosedDates && !isClosed && "bg-red-100",
+                            isClosed && "bg-red-200"
+                          )}>
                             {bookedCount > 0 && (
                               <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
                                 {bookedCount}
@@ -526,8 +576,14 @@ const Calendar = () => {
                     <div className="grid grid-cols-31 h-full">
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
+                        const isClosed = isDateClosed(roomType.id, date);
+                        const hasClosedDates = hasClosedDatesForRoom(roomType.id);
                         return (
-                          <div key={`${roomType.id}-rate-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer">
+                          <div key={`${roomType.id}-rate-${index}`} className={cn(
+                            "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer",
+                            hasClosedDates && !isClosed && "bg-red-100",
+                            isClosed && "bg-red-200"
+                          )}>
                             <span className="text-[10px] text-muted-foreground">THB</span>
                             <span className="text-xs font-medium">{roomType.data.rates[dataIndex]}</span>
                           </div>
