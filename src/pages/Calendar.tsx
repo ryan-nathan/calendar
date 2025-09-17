@@ -57,6 +57,7 @@ const Calendar = () => {
   const [roomTypes, setRoomTypes] = useState(initialRoomTypes);
   const [currentStartDate, setCurrentStartDate] = useState(new Date(2025, 8, 16)); // Sept 16, 2025
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
+  const [simpleBulkEditOpen, setSimpleBulkEditOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState("superior");
   const [closedDates, setClosedDates] = useState<{[roomTypeId: string]: {[dateKey: string]: boolean}}>({});
   const [isDragging, setIsDragging] = useState(false);
@@ -237,7 +238,7 @@ const Calendar = () => {
           toggleDateStatus(currentDragRoomType, date);
         }
       } else {
-        // For drag selection of multiple dates, open bulk edit dialog
+        // For drag selection of multiple dates, open simple bulk edit dialog
         const startDate = calendarDates[startIndex];
         const endDate = calendarDates[endIndex];
         
@@ -248,7 +249,7 @@ const Calendar = () => {
             roomTypeId: currentDragRoomType
           });
           setSelectedRoomType(currentDragRoomType);
-          setBulkEditOpen(true);
+          setSimpleBulkEditOpen(true);
         }
       }
     }
@@ -967,6 +968,100 @@ const Calendar = () => {
           </div>
         </div>
       </div>
+
+      {/* Simple Bulk Edit Dialog for Drag Selections */}
+      <Sheet open={simpleBulkEditOpen} onOpenChange={setSimpleBulkEditOpen}>
+        <SheetContent className="w-[400px] sm:w-[400px]">
+          <SheetHeader>
+            <div className="flex items-center justify-between">
+              <SheetTitle className="sr-only">Bulk Edit</SheetTitle>
+              <Button variant="ghost" size="sm" onClick={() => setSimpleBulkEditOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </SheetHeader>
+          
+          <div className="mt-6 space-y-6">
+            {/* Room Type Header */}
+            <div>
+              <h2 className="text-xl font-semibold">{getCurrentRoomType()?.name}</h2>
+              <p className="text-sm text-muted-foreground">Standard Rate</p>
+              {bulkEditSelection.startDate && bulkEditSelection.endDate && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formatDateRange(bulkEditSelection.startDate, bulkEditSelection.endDate)}
+                </p>
+              )}
+              <Button variant="link" className="text-primary p-0 mt-2 text-sm">
+                Bulk edit
+              </Button>
+            </div>
+
+            {/* Room Status */}
+            <div className="space-y-3">
+              <RadioGroup 
+                value={bulkEditData.roomStatus} 
+                onValueChange={(value) => setBulkEditData(prev => ({ ...prev, roomStatus: value }))}
+                className="flex gap-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="open" id="bulk-open" />
+                  <Label htmlFor="bulk-open" className="text-sm font-medium">Open</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="close" id="bulk-close" />
+                  <Label htmlFor="bulk-close" className="text-sm font-medium">Close</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Price */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Price</Label>
+              <div className="flex gap-2">
+                <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground border">
+                  THB
+                </div>
+                <Input
+                  type="number"
+                  placeholder="3750"
+                  value={bulkEditData.price}
+                  onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+
+            {/* Rooms to sell */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Rooms to sell</Label>
+              <Input
+                type="number"
+                placeholder="Number of rooms"
+                value={bulkEditData.roomsToSell}
+                onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button onClick={handleBulkEditSave} className="flex-1">
+                Save
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSimpleBulkEditOpen(false);
+                  setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
+                  setBulkEditData(prev => ({ ...prev, roomsToSell: "", price: "" }));
+                }}
+                className="flex-1 text-primary border-primary"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
