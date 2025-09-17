@@ -492,38 +492,10 @@ const Calendar = () => {
         {/* Calendar Grid - Horizontal Scroll Container */}
         <div className="overflow-hidden">
           <div className="min-w-auto">
-          {/* Month Headers and Navigation */}
+          {/* Month Headers */}
           <div className="grid grid-cols-[220px_1fr] mb-4 relative">
             <div></div>
-            <div className="flex items-center justify-between h-6">
-              {/* Month headers positioned in same row as navigation */}
-              <div className="flex-1 relative">
-                <div className="grid grid-cols-31 absolute inset-0">
-                  {(() => {
-                    const monthHeaders: JSX.Element[] = [];
-                    let currentMonth = -1;
-
-                    calendarDates.forEach((date, index) => {
-                      if (date.getMonth() !== currentMonth) {
-                        currentMonth = date.getMonth();
-                        const colStart = index + 1; // grid columns are 1-indexed
-                        monthHeaders.push(
-                          <h2
-                            key={`month-${currentMonth}-${date.getFullYear()}`}
-                            className="text-sm font-medium justify-self-start whitespace-nowrap"
-                            style={{ gridColumnStart: colStart }}
-                          >
-                            {date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                          </h2>
-                        );
-                      }
-                    });
-
-                    return monthHeaders;
-                  })()}
-                </div>
-              </div>
-              {/* Navigation arrows */}
+            <div className="flex items-center justify-end">
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" onClick={handlePreviousWeek}>
                   <ChevronLeft className="h-4 w-4" />
@@ -531,6 +503,34 @@ const Calendar = () => {
                 <Button variant="ghost" size="sm" onClick={handleNextWeek}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
+              </div>
+            </div>
+            {/* Positioned month headers aligned with first date of each month */}
+            <div className="absolute top-0 left-[220px] right-0 pointer-events-none">
+              {/* Use the same 31-column grid to align headers with borders */}
+              <div className="grid grid-cols-31 h-6">
+                {(() => {
+                  const monthHeaders: JSX.Element[] = [];
+                  let currentMonth = -1;
+
+                  calendarDates.forEach((date, index) => {
+                    if (date.getMonth() !== currentMonth) {
+                      currentMonth = date.getMonth();
+                      const colStart = index + 1; // grid columns are 1-indexed
+                      monthHeaders.push(
+                        <h2
+                          key={`month-${currentMonth}-${date.getFullYear()}`}
+                          className="text-sm font-medium justify-self-start whitespace-nowrap"
+                          style={{ gridColumnStart: colStart }}
+                        >
+                          {date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                        </h2>
+                      );
+                    }
+                  });
+
+                  return monthHeaders;
+                })()}
               </div>
             </div>
           </div>
