@@ -1140,11 +1140,8 @@ const Calendar = () => {
           
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground mb-2">
-                <strong>Last sync with your connectivity provider:</strong>
-              </p>
-              <p className="text-sm">
-                {getCurrentSyncTime()}
+              <p className="text-sm text-muted-foreground">
+                Last sync with your connectivity provider: {getCurrentSyncTime()}
               </p>
             </div>
             
