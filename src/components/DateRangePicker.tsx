@@ -37,15 +37,6 @@ export function DateRangePicker({
     onDateChange?.(newDate);
   };
 
-  const handleDayClick = (day: Date) => {
-    // If we have a complete range, any click should start a new range
-    if (displayDate?.from && displayDate?.to) {
-      const newRange = { from: day, to: undefined };
-      setInternalDate(newRange);
-      onDateChange?.(newRange);
-    }
-  };
-
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -80,7 +71,6 @@ export function DateRangePicker({
             defaultMonth={displayDate?.from}
             selected={displayDate}
             onSelect={handleDateChange}
-            onDayClick={handleDayClick}
             numberOfMonths={2}
             className={cn("p-3 pointer-events-auto")}
           />
