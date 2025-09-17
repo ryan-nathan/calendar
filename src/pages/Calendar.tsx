@@ -90,6 +90,7 @@ const Calendar = () => {
   });
   const [currentView, setCurrentView] = useState<"list-view" | "yearly-view">("list-view");
   const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState("all-rooms");
+  const [lastIndividualRoomType, setLastIndividualRoomType] = useState("superior");
   const [syncInfoDialogOpen, setSyncInfoDialogOpen] = useState(false);
 
   const getCurrentSyncTime = () => {
@@ -101,6 +102,29 @@ const Calendar = () => {
     const minutes = now.getMinutes().toString().padStart(2, '0');
     
     return `${day} ${month} ${year}, ${hours}:${minutes}`;
+  };
+
+  // Handle room type filter changes
+  const handleRoomTypeFilterChange = (value: string) => {
+    setSelectedRoomTypeFilter(value);
+    // Track the last individually selected room type (not "all-rooms")
+    if (value !== "all-rooms") {
+      setLastIndividualRoomType(value);
+    }
+  };
+
+  // Handle view switching
+  const handleViewChange = (value: "list-view" | "yearly-view") => {
+    if (value === "yearly-view") {
+      // When switching to yearly view, if "all-rooms" is selected, use last individual room type
+      if (selectedRoomTypeFilter === "all-rooms") {
+        setSelectedRoomTypeFilter(lastIndividualRoomType);
+      }
+    } else if (value === "list-view") {
+      // When switching back to list view, default to "all-rooms"
+      setSelectedRoomTypeFilter("all-rooms");
+    }
+    setCurrentView(value);
   };
 
   const generateCalendarDates = () => {
@@ -538,12 +562,14 @@ const Calendar = () => {
           {/* Controls */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <Select value={selectedRoomTypeFilter} onValueChange={setSelectedRoomTypeFilter}>
+              <Select value={selectedRoomTypeFilter} onValueChange={handleRoomTypeFilterChange}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="All rooms" />
+                  <SelectValue placeholder={currentView === "list-view" ? "All rooms" : "Select room type"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all-rooms">All rooms</SelectItem>
+                  {currentView === "list-view" && (
+                    <SelectItem value="all-rooms">All rooms</SelectItem>
+                  )}
                   <SelectItem value="superior">Superior Room</SelectItem>
                   <SelectItem value="deluxe-balcony">Deluxe Room with Balcony</SelectItem>
                   <SelectItem value="deluxe-oasis">Deluxe Oasis Ground Floor</SelectItem>
@@ -567,7 +593,7 @@ const Calendar = () => {
               </div>
             </div>
             
-            <Select value={currentView} onValueChange={(value: "list-view" | "yearly-view") => setCurrentView(value)}>
+            <Select value={currentView} onValueChange={handleViewChange}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue />
               </SelectTrigger>
@@ -599,7 +625,7 @@ const Calendar = () => {
           <YearlyView 
             roomTypes={roomTypes}
             closedDates={closedDates}
-            selectedRoomTypeFilter={selectedRoomTypeFilter === "all-rooms" ? "superior" : selectedRoomTypeFilter}
+            selectedRoomTypeFilter={selectedRoomTypeFilter}
             baseDataDate={BASE_DATA_DATE}
             onDateClick={(date) => {
               // Handle date click in yearly view - could open bulk edit or navigate
