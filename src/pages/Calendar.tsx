@@ -522,18 +522,20 @@ const Calendar = () => {
             </Select>
           </div>
 
-          {/* Date Range and Restrictions */}
-          <div className="flex items-center gap-4 mb-6">
-            <DateRangePicker 
-              date={dateRangeSelection}
-              onDateChange={handleDateRangeChange}
-            />
-            
-            <div className="flex items-center gap-2">
-              <Checkbox id="restrictions" />
-              <Label htmlFor="restrictions" className="text-sm">Restrictions</Label>
+          {/* Date Range and Restrictions - Only show in list view */}
+          {currentView === "list-view" && (
+            <div className="flex items-center gap-4 mb-6">
+              <DateRangePicker 
+                date={dateRangeSelection}
+                onDateChange={handleDateRangeChange}
+              />
+              
+              <div className="flex items-center gap-2">
+                <Checkbox id="restrictions" />
+                <Label htmlFor="restrictions" className="text-sm">Restrictions</Label>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Calendar Content */}
