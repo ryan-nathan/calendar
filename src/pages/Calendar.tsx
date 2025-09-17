@@ -493,21 +493,9 @@ const Calendar = () => {
         <div className="overflow-hidden">
           <div className="min-w-auto">
           {/* Month Headers */}
-          <div className="grid grid-cols-[220px_1fr] mb-4">
+          <div className="grid grid-cols-[220px_1fr] mb-4 relative">
             <div></div>
-            <div className="flex items-center justify-between">
-              <div className="flex gap-8">
-                {calendarDates.slice(0, 15).some((date, index) => index === 0 || date.getMonth() !== calendarDates[index - 1]?.getMonth()) && (
-                  <h2 className="text-sm font-medium">
-                    {calendarDates[0]?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                  </h2>
-                )}
-                {calendarDates.slice(15).some((date, index) => calendarDates[14 + index]?.getMonth() !== calendarDates[14 + index - 1]?.getMonth()) && (
-                  <h2 className="text-sm font-medium">
-                    {calendarDates.find((date, index) => index > 14 && date.getMonth() !== calendarDates[index - 1]?.getMonth())?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                  </h2>
-                )}
-              </div>
+            <div className="flex items-center justify-end">
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" onClick={handlePreviousWeek}>
                   <ChevronLeft className="h-4 w-4" />
@@ -516,6 +504,31 @@ const Calendar = () => {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
+            </div>
+            {/* Positioned month headers aligned with first date of each month */}
+            <div className="absolute top-0 left-[220px] right-0">
+              {(() => {
+                const monthHeaders: JSX.Element[] = [];
+                let currentMonth = -1;
+                
+                calendarDates.forEach((date, index) => {
+                  if (date.getMonth() !== currentMonth) {
+                    currentMonth = date.getMonth();
+                    const leftPercent = (index / 31) * 100;
+                    monthHeaders.push(
+                      <h2 
+                        key={`month-${currentMonth}-${date.getFullYear()}`}
+                        className="absolute text-sm font-medium"
+                        style={{ left: `${leftPercent}%` }}
+                      >
+                        {date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </h2>
+                    );
+                  }
+                });
+                
+                return monthHeaders;
+              })()}
             </div>
           </div>
 
