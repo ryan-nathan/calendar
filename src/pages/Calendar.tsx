@@ -1516,12 +1516,12 @@ const Calendar = () => {
                         
                         return (
                            <div key={`${roomType.id}-rate-${index}`} className={cn(
-                             "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center cursor-pointer relative",
-                             !isDragging && "hover:bg-calendar-cell-hover",
-                             isClosed && "bg-red-200",
-                             isInMultiCellDragRange(index, roomType.id, 'rates') && "bg-blue-200",
-                             isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
-                           )}
+                              "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center cursor-pointer relative",
+                              !isDragging && "hover:bg-calendar-cell-hover",
+                              isClosed && "bg-red-200 text-red-900",
+                              isInMultiCellDragRange(index, roomType.id, 'rates') && "bg-blue-200",
+                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
+                            )}
                               onMouseDown={(e) => {
                                 e.stopPropagation();
                                 handleMouseDown(roomType.id, index, 'rates');
