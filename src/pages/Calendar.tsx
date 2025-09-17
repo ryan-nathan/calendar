@@ -159,11 +159,11 @@ const Calendar = () => {
         </div>
 
         {/* Calendar Grid */}
-        <div className="min-w-[1400px]">
+        <div className="relative">
           {/* Month Headers */}
-          <div className="grid grid-cols-[200px_1fr] mb-4">
-            <div></div>
-            <div className="flex items-center justify-between">
+          <div className="flex mb-4">
+            <div className="w-[200px] sticky left-0 z-10 bg-background"></div>
+            <div className="flex-1 min-w-[1200px] flex items-center justify-between">
               <h2 className="text-xl font-semibold">September 2025</h2>
               <h2 className="text-xl font-semibold">October 2025</h2>
               <Button variant="ghost" size="sm">
@@ -173,9 +173,9 @@ const Calendar = () => {
           </div>
 
           {/* Calendar Header - Days and Dates */}
-          <div className="grid grid-cols-[200px_1fr] border border-calendar-grid-border rounded-t-lg overflow-hidden">
-            <div className="bg-muted/50 border-r border-calendar-grid-border"></div>
-            <div className="bg-muted/50">
+          <div className="flex border border-calendar-grid-border rounded-t-lg overflow-hidden">
+            <div className="w-[200px] bg-muted/50 border-r border-calendar-grid-border sticky left-0 z-10"></div>
+            <div className="flex-1 min-w-[1200px] bg-muted/50">
               <div className="grid grid-cols-31 h-full">
                 {calendarDates.map((date, index) => (
                   <div key={index} className="border-r border-calendar-grid-border last:border-r-0">
@@ -194,19 +194,19 @@ const Calendar = () => {
             {roomTypes.map((roomType, roomIndex) => (
               <div key={roomType.id} className="border-x border-b border-calendar-grid-border">
                 {/* Room Type Header */}
-                <div className="grid grid-cols-[200px_1fr] bg-muted/30 border-b border-calendar-grid-border">
-                  <div className="p-3 border-r border-calendar-grid-border">
+                <div className="flex bg-muted/30 border-b border-calendar-grid-border">
+                  <div className="w-[200px] p-3 border-r border-calendar-grid-border sticky left-0 z-10 bg-muted/30">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold">{roomType.name}</h3>
                     </div>
                   </div>
-                  <div className="p-3 flex justify-end">
+                  <div className="flex-1 min-w-[1200px] p-3 flex justify-end">
                     <Sheet open={bulkEditOpen && selectedRoomType === roomType.id} onOpenChange={(open) => {
                       setBulkEditOpen(open);
                       if (open) setSelectedRoomType(roomType.id);
                     }}>
                       <SheetTrigger asChild>
-                        <Button variant="default" size="sm">
+                        <Button variant="default" size="sm" className="sticky right-4 z-10">
                           Bulk edit
                         </Button>
                       </SheetTrigger>
@@ -401,8 +401,8 @@ const Calendar = () => {
                 </div>
 
                 {/* Room Status Row */}
-                <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
+                <div className="flex border-b border-calendar-grid-border">
+                  <div className="w-[200px] p-3 bg-muted/30 border-r border-calendar-grid-border sticky left-0 z-10">
                     <span className="text-sm font-medium">Room status</span>
                     <div className="mt-1">
                       <span className="inline-block px-2 py-1 bg-calendar-bookable text-calendar-bookable-foreground text-xs rounded">
@@ -410,7 +410,7 @@ const Calendar = () => {
                       </span>
                     </div>
                   </div>
-                  <div className="h-12">
+                  <div className="flex-1 min-w-[1200px] h-12">
                     <div className="grid grid-cols-31 h-full">
                       {calendarDates.map((date, index) => (
                         <div key={`${roomType.id}-status-${index}`} className="border-r border-calendar-grid-border last:border-r-0 bg-calendar-bookable hover:bg-calendar-bookable/80 cursor-pointer"></div>
@@ -420,8 +420,8 @@ const Calendar = () => {
                 </div>
 
                 {/* Rooms to Sell Row */}
-                <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
+                <div className="flex border-b border-calendar-grid-border">
+                  <div className="w-[200px] p-3 bg-muted/30 border-r border-calendar-grid-border sticky left-0 z-10">
                     <span className="text-sm font-medium">Rooms to sell</span>
                     <div className="mt-1">
                       <Button variant="link" size="sm" className="text-primary p-0 h-auto text-xs">
@@ -429,7 +429,7 @@ const Calendar = () => {
                       </Button>
                     </div>
                   </div>
-                  <div className="h-12">
+                  <div className="flex-1 min-w-[1200px] h-12">
                     <div className="grid grid-cols-31 h-full">
                       {calendarDates.map((date, index) => (
                         <div key={`${roomType.id}-rooms-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer">
@@ -441,11 +441,11 @@ const Calendar = () => {
                 </div>
 
                 {/* Net Booked Row */}
-                <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
+                <div className="flex border-b border-calendar-grid-border">
+                  <div className="w-[200px] p-3 bg-muted/30 border-r border-calendar-grid-border sticky left-0 z-10">
                     <span className="text-sm font-medium">Net booked</span>
                   </div>
-                  <div className="h-12">
+                  <div className="flex-1 min-w-[1200px] h-12">
                     <div className="grid grid-cols-31 h-full">
                       {calendarDates.map((date, index) => (
                         <div key={`${roomType.id}-booked-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center">
@@ -461,8 +461,8 @@ const Calendar = () => {
                 </div>
 
                 {/* Standard Rate Row */}
-                <div className="grid grid-cols-[200px_1fr] border-b border-calendar-grid-border last:border-b-0">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
+                <div className="flex border-b border-calendar-grid-border last:border-b-0">
+                  <div className="w-[200px] p-3 bg-muted/30 border-r border-calendar-grid-border sticky left-0 z-10">
                     <div className="flex items-center gap-1">
                       <ChevronDown className="h-4 w-4" />
                       <span className="text-sm font-medium">Standard Rate</span>
@@ -472,7 +472,7 @@ const Calendar = () => {
                       <span className="text-xs">2 Edit</span>
                     </div>
                   </div>
-                  <div className="h-12">
+                  <div className="flex-1 min-w-[1200px] h-12">
                     <div className="grid grid-cols-31 h-full">
                       {calendarDates.map((date, index) => (
                         <div key={`${roomType.id}-rate-${index}`} className="border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer">
