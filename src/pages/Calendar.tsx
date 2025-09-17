@@ -96,6 +96,7 @@ const Calendar = () => {
   const [lastIndividualRoomType, setLastIndividualRoomType] = useState("superior");
   const [syncInfoDialogOpen, setSyncInfoDialogOpen] = useState(false);
   const [previousRoomTypesState, setPreviousRoomTypesState] = useState<typeof initialRoomTypes | null>(null);
+  const [previousClosedDatesState, setPreviousClosedDatesState] = useState<{[roomTypeId: string]: {[dateKey: string]: boolean}} | null>(null);
 
   const getCurrentSyncTime = () => {
     const now = new Date();
@@ -397,6 +398,7 @@ const Calendar = () => {
   const handleSaveEdit = () => {
     if (!editingCell) return;
     
+    console.log('handleSaveEdit called, saving current state...');
     // Save current state before making changes
     saveCurrentState();
     
@@ -435,18 +437,26 @@ const Calendar = () => {
 
   // Save current state before making changes
   const saveCurrentState = () => {
+    console.log('Saving current state...', { roomTypes, closedDates });
     setPreviousRoomTypesState(JSON.parse(JSON.stringify(roomTypes)));
+    setPreviousClosedDatesState(JSON.parse(JSON.stringify(closedDates)));
   };
 
   // Undo function to revert to previous state
   const handleUndo = () => {
-    if (previousRoomTypesState) {
+    console.log('Undo clicked, previous states:', { previousRoomTypesState, previousClosedDatesState });
+    if (previousRoomTypesState && previousClosedDatesState !== null) {
+      console.log('Restoring previous state...');
       setRoomTypes(previousRoomTypesState);
+      setClosedDates(previousClosedDatesState);
       setPreviousRoomTypesState(null);
+      setPreviousClosedDatesState(null);
       toast({
         title: "Changes reverted",
         description: "Your data has been restored to the previous state.",
       });
+    } else {
+      console.log('No previous state to restore');
     }
   };
 
@@ -646,7 +656,7 @@ const Calendar = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleUndo}
-                disabled={!previousRoomTypesState}
+                disabled={!previousRoomTypesState || previousClosedDatesState === null}
                 className="px-3"
               >
                 Undo
