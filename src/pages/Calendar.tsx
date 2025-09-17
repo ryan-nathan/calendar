@@ -518,8 +518,8 @@ const Calendar = () => {
                   const isSaturday = dayName === 'Sat';
                   return (
                     <div key={index} className={cn(
-                      "border-r border-calendar-grid-border last:border-r-0",
-                      isSaturday && "border-r-2 border-r-blue-500"
+                      "border-r border-calendar-grid-border last:border-r-0 relative",
+                      isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                     )}>
                       <div className="p-1 text-center">
                         <div className="text-xs text-muted-foreground">{dayName}</div>
@@ -825,7 +825,7 @@ const Calendar = () => {
                             className={cn(
                               "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
                               inDragRange && "bg-blue-200",
-                              isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
+                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                             )}
                             onMouseDown={() => handleMouseDown(roomType.id, index)}
                             onMouseMove={() => handleMouseMove(index)}
@@ -859,7 +859,7 @@ const Calendar = () => {
                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer relative",
                             isClosed && "bg-red-200",
                             isInDragRange(index, roomType.id) && "bg-blue-200",
-                            isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
+                             isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                           )}
                             onMouseDown={() => handleMouseDown(roomType.id, index)}
                             onMouseMove={() => handleMouseMove(index)}
@@ -911,7 +911,7 @@ const Calendar = () => {
                           <div key={`${roomType.id}-booked-${index}`} className={cn(
                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center relative",
                             isClosed && "bg-red-200",
-                            isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
+                             isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                           )}>
                             {bookedCount > 0 && (
                               <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
@@ -944,7 +944,7 @@ const Calendar = () => {
                             "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer relative",
                             isClosed && "bg-red-200",
                             isInDragRange(index, roomType.id) && "bg-blue-200",
-                            isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
+                            isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
                           )}
                             onMouseDown={() => handleMouseDown(roomType.id, index)}
                             onMouseMove={() => handleMouseMove(index)}
