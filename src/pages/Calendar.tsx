@@ -1,3 +1,4 @@
+// Calendar component - Updated: ${new Date().toISOString()}
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,7 @@ const getDataIndexForDate = (date: Date): number => {
 };
 
 const Calendar = () => {
+  console.log("Calendar component loaded"); // Debug log to verify fresh build
   const [roomTypes, setRoomTypes] = useState(initialRoomTypes);
   const [currentStartDate, setCurrentStartDate] = useState(new Date()); // Today
   const [bulkEditOpen, setBulkEditOpen] = useState(false);
