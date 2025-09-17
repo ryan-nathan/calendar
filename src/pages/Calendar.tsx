@@ -547,12 +547,7 @@ const Calendar = () => {
                       </SheetTrigger>
                       <SheetContent className="w-[640px] sm:w-[640px]">
                         <SheetHeader>
-                          <div className="flex items-center justify-between">
-                            <SheetTitle className="text-xl font-semibold">Bulk edit</SheetTitle>
-                            <Button variant="ghost" size="sm" onClick={() => setBulkEditOpen(false)}>
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          <SheetTitle className="text-xl font-semibold">Bulk edit</SheetTitle>
                         </SheetHeader>
                         
                         <div className="mt-6 space-y-6">
@@ -973,12 +968,7 @@ const Calendar = () => {
       <Sheet open={simpleBulkEditOpen} onOpenChange={setSimpleBulkEditOpen}>
         <SheetContent className="w-[400px] sm:w-[400px]">
           <SheetHeader>
-            <div className="flex items-center justify-between">
-              <SheetTitle className="sr-only">Bulk Edit</SheetTitle>
-              <Button variant="ghost" size="sm" onClick={() => setSimpleBulkEditOpen(false)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <SheetTitle className="sr-only">Bulk Edit</SheetTitle>
           </SheetHeader>
           
           <div className="mt-6 space-y-6">
