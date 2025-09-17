@@ -1432,7 +1432,8 @@ const Calendar = () => {
                         return (
                            <div key={`${roomType.id}-rooms-${index}`} className={cn(
                              "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium cursor-pointer relative",
-                             !isDragging && "hover:bg-calendar-cell-hover",
+                             !isDragging && !isClosed && "hover:bg-calendar-bookable-hover",
+                             !isDragging && isClosed && "hover:bg-calendar-cell-hover",
                              isClosed && "bg-red-200",
                               isInMultiCellDragRange(index, roomType.id, 'roomsToSell') && "bg-blue-200",
                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"

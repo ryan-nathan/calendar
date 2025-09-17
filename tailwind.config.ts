@@ -50,6 +50,7 @@ export default {
         calendar: {
           bookable: "hsl(var(--calendar-bookable))",
           "bookable-foreground": "hsl(var(--calendar-bookable-foreground))",
+          "bookable-hover": "hsl(var(--calendar-bookable-hover))",
           "rate-closed": "hsl(var(--calendar-rate-closed))",
           "rate-closed-foreground": "hsl(var(--calendar-rate-closed-foreground))",
           "grid-border": "hsl(var(--calendar-grid-border))",
