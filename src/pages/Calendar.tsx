@@ -317,20 +317,28 @@ const Calendar = () => {
   };
 
   const handleBulkEditSave = () => {
-    if (!bulkEditSelection.startDate || !bulkEditSelection.endDate || !bulkEditSelection.roomTypeId) return;
+    // Use form date inputs for date range, fall back to selection dates for drag-selected edits
+    const fromDate = new Date(bulkEditData.fromDate);
+    const toDate = new Date(bulkEditData.toDate);
     
-    const startIndex = calendarDates.findIndex(date => date.toDateString() === bulkEditSelection.startDate?.toDateString());
-    const endIndex = calendarDates.findIndex(date => date.toDateString() === bulkEditSelection.endDate?.toDateString());
+    // Find all calendar dates within the specified range
+    const affectedDates = calendarDates.filter(date => {
+      return date >= fromDate && date <= toDate;
+    });
     
-    if (startIndex === -1 || endIndex === -1) return;
+    if (affectedDates.length === 0) return;
     
-    // Apply bulk changes
+    // Get the room type to modify
+    const roomTypeId = bulkEditSelection.roomTypeId || selectedRoomType;
+    if (!roomTypeId) return;
+    
+    // Apply bulk changes to rooms and rates
     setRoomTypes(prev => prev.map(roomType => {
-      if (roomType.id === bulkEditSelection.roomTypeId) {
+      if (roomType.id === roomTypeId) {
         const newData = { ...roomType.data };
         
-        for (let i = startIndex; i <= endIndex; i++) {
-          const dataIndex = getDataIndexForDate(calendarDates[i]);
+        affectedDates.forEach(date => {
+          const dataIndex = getDataIndexForDate(date);
           
           // Update rooms to sell if specified
           if (bulkEditData.roomsToSell) {
@@ -349,30 +357,28 @@ const Calendar = () => {
               newData.rates[dataIndex] = price;
             }
           }
-        }
+        });
         
         return { ...roomType, data: newData };
       }
       return roomType;
     }));
     
-    // Apply room status changes
-    if (bulkEditSelection.roomTypeId) {
-      const shouldClose = bulkEditData.roomStatus === 'close';
-      setClosedDates(prev => {
-        const newClosedDates = { ...prev };
-        if (!newClosedDates[bulkEditSelection.roomTypeId!]) {
-          newClosedDates[bulkEditSelection.roomTypeId!] = {};
-        }
-        
-        for (let i = startIndex; i <= endIndex; i++) {
-          const dateKey = getDateKey(calendarDates[i]);
-          newClosedDates[bulkEditSelection.roomTypeId!][dateKey] = shouldClose;
-        }
-        
-        return newClosedDates;
+    // Apply room status changes to dates within form range
+    const shouldClose = bulkEditData.roomStatus === 'close';
+    setClosedDates(prev => {
+      const newClosedDates = { ...prev };
+      if (!newClosedDates[roomTypeId]) {
+        newClosedDates[roomTypeId] = {};
+      }
+      
+      affectedDates.forEach(date => {
+        const dateKey = getDateKey(date);
+        newClosedDates[roomTypeId][dateKey] = shouldClose;
       });
-    }
+      
+      return newClosedDates;
+    });
     
     // Close dialog and reset
     setBulkEditOpen(false);
