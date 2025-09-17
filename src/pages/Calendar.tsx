@@ -67,6 +67,8 @@ const Calendar = () => {
   const [editingCell, setEditingCell] = useState<{roomTypeId: string, dateIndex: number, field: 'roomsToSell' | 'rates'} | null>(null);
   const [editValue, setEditValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [totalMonths, setTotalMonths] = useState(2); // Start with 2 months
   const [bulkEditData, setBulkEditData] = useState({
     fromDate: new Date().toISOString().split('T')[0], // Today
     toDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
@@ -83,12 +85,14 @@ const Calendar = () => {
     roomTypeId: null
   });
 
-  // Generate calendar dates from current start date (31 days total)
+  // Generate calendar dates from current start date (based on totalMonths)
   const generateCalendarDates = () => {
     const dates = [];
     let currentDate = new Date(currentStartDate);
     
-    for (let i = 0; i < 31; i++) {
+    // Generate dates for totalMonths worth of data
+    const daysToGenerate = totalMonths * 31; // Roughly 31 days per month
+    for (let i = 0; i < daysToGenerate; i++) {
       dates.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -98,10 +102,23 @@ const Calendar = () => {
 
   const calendarDates = generateCalendarDates();
   
+  // Lazy loading scroll handler  
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    const scrollPercentage = (scrollLeft + clientWidth) / scrollWidth;
+    
+    // Load more months when user scrolls to 80% of current content
+    if (scrollPercentage > 0.8) {
+      setTotalMonths(prev => prev + 1);
+    }
+  };
+
   // Generate date range string for display
   const generateDateRangeString = () => {
     const endDate = new Date(currentStartDate);
-    endDate.setDate(endDate.getDate() + 30);
+    endDate.setDate(endDate.getDate() + (totalMonths * 31) - 1);
     
     const startStr = currentStartDate.toLocaleDateString('en-GB', { 
       day: 'numeric', 
@@ -133,11 +150,19 @@ const Calendar = () => {
   };
   
   // Group dates by month for display
-  const septemberDates = calendarDates.filter(date => date.getMonth() === 8);
-  const octoberDates = calendarDates.filter(date => date.getMonth() === 9);
-  // Aliases to maintain compatibility with older references
-  const septemberDays = septemberDates;
-  const octoberDays = octoberDates;
+  const datesByMonth = calendarDates.reduce((acc, date) => {
+    const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+    if (!acc[monthKey]) {
+      acc[monthKey] = [];
+    }
+    acc[monthKey].push(date);
+    return acc;
+  }, {} as Record<string, Date[]>);
+
+  // Get month names for headers
+  const getMonthName = (date: Date) => {
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
 
   const handleDayOfWeekToggle = (day: string) => {
     setBulkEditData(prev => ({
@@ -178,39 +203,6 @@ const Calendar = () => {
 
   const hasClosedDatesForRoom = (roomTypeId: string) => {
     return Object.values(closedDates[roomTypeId] || {}).some(isClosed => isClosed);
-  };
-
-  // Create segments of consecutive open/closed dates
-  const createDateSegments = (roomTypeId: string, dates: Date[]) => {
-    const segments: Array<{type: 'open' | 'closed', startIndex: number, endIndex: number, dates: Date[]}> = [];
-    let currentSegment: {type: 'open' | 'closed', startIndex: number, endIndex: number, dates: Date[]} | null = null;
-
-    dates.forEach((date, index) => {
-      const isClosed = isDateClosed(roomTypeId, date);
-      const segmentType = isClosed ? 'closed' : 'open';
-
-      if (!currentSegment || currentSegment.type !== segmentType) {
-        if (currentSegment) {
-          currentSegment.endIndex = index - 1;
-          segments.push(currentSegment);
-        }
-        currentSegment = {
-          type: segmentType,
-          startIndex: index,
-          endIndex: index,
-          dates: [date]
-        };
-      } else {
-        currentSegment.dates.push(date);
-        currentSegment.endIndex = index;
-      }
-    });
-
-    if (currentSegment) {
-      segments.push(currentSegment);
-    }
-
-    return segments;
   };
 
   const handleMouseDown = (roomTypeId: string, dateIndex: number) => {
@@ -478,603 +470,434 @@ const Calendar = () => {
         </div>
 
         {/* Calendar Grid - Horizontal Scroll Container */}
-        <div className="overflow-hidden">
-          <div className="min-w-auto">
-            {/* Month Headers */}
-            <div className="grid grid-cols-[220px_1fr] mb-4">
-            <div></div>
-            <div className="flex items-center justify-between">
-              <div></div>
-              <div className="flex gap-8">
-                {calendarDates.slice(0, 15).some((date, index) => index === 0 || date.getMonth() !== calendarDates[index - 1]?.getMonth()) && (
-                  <h2 className="text-sm font-medium">
-                    {calendarDates[0]?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                  </h2>
-                )}
-                {calendarDates.slice(15).some((date, index) => calendarDates[14 + index]?.getMonth() !== calendarDates[14 + index - 1]?.getMonth()) && (
-                  <h2 className="text-sm font-medium">
-                    {calendarDates.find((date, index) => index > 14 && date.getMonth() !== calendarDates[index - 1]?.getMonth())?.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                  </h2>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={handlePreviousWeek}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleNextWeek}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Calendar Header - Days and Dates */}
-          <div className="grid grid-cols-[220px_1fr] border border-calendar-grid-border rounded-t-lg overflow-hidden">
-            <div className="bg-muted/50 border-r border-calendar-grid-border"></div>
-            <div className="bg-muted/50">
-              <div className="grid grid-cols-31 h-full">
-                {calendarDates.map((date, index) => {
-                  const dayName = getDayName(date);
-                  const isSaturday = dayName === 'Sat';
-                  return (
-                    <div key={index} className={cn(
-                      "border-r border-calendar-grid-border last:border-r-0",
-                      isSaturday && "border-r-2 border-r-blue-500"
-                    )}>
-                      <div className="p-1 text-center">
-                        <div className="text-xs text-muted-foreground">{dayName}</div>
-                        <div className="text-xs font-medium">{getDateNumber(date)}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Room Types */}
-          <div className="space-y-0">
-            {roomTypes.map((roomType, roomIndex) => (
-              <div key={roomType.id} className={cn(
-                "border-x border-b border-calendar-grid-border",
-                roomIndex === roomTypes.length - 1 && "rounded-b-lg"
-              )}>
-                {/* Room Type Header */}
-                <div className="grid grid-cols-[220px_1fr] bg-muted/30 border-b border-calendar-grid-border">
-                  <div className="p-3 border-r border-calendar-grid-border flex items-center">
-                    <h3 className="text-sm font-semibold truncate">{roomType.name}</h3>
-                  </div>
-                  <div className="p-3 flex justify-end">
-                    <Sheet open={bulkEditOpen && selectedRoomType === roomType.id} onOpenChange={(open) => {
-                      setBulkEditOpen(open);
-                      if (open) {
-                        setSelectedRoomType(roomType.id);
-                        // If no selection yet, default to the visible range
-                        if (!bulkEditSelection.startDate || !bulkEditSelection.endDate) {
-                          setBulkEditSelection({
-                            startDate: calendarDates[0],
-                            endDate: calendarDates[calendarDates.length - 1],
-                            roomTypeId: roomType.id,
-                          });
-                        }
-                      } else {
-                        // Reset when closing via UI controls
-                        setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
-                        setBulkEditData((prev) => ({ ...prev, roomsToSell: "", price: "" }));
-                      }
-                    }}>
-                      <SheetTrigger asChild>
-                        <Button variant="default" size="sm">
-                          Bulk edit
-                        </Button>
-                      </SheetTrigger>
-                      <SheetContent className="w-[450px] sm:w-[450px] max-w-none sm:max-w-none overflow-y-auto" style={{width: '450px'}}>
-                        <SheetHeader>
-                          <SheetTitle className="text-xl font-semibold">Bulk edit</SheetTitle>
-                        </SheetHeader>
-                        
-                        <div className="mt-6 space-y-6">
-                          {/* Date Range */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="from-date" className="text-sm font-medium">From:</Label>
-                              <Input
-                                id="from-date"
-                                type="date"
-                                value={bulkEditData.fromDate}
-                                onChange={(e) => setBulkEditData(prev => ({ ...prev, fromDate: e.target.value }))}
-                                className="mt-1"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="to-date" className="text-sm font-medium">Up to and including:</Label>
-                              <Input
-                                id="to-date"
-                                type="date"
-                                value={bulkEditData.toDate}
-                                onChange={(e) => setBulkEditData(prev => ({ ...prev, toDate: e.target.value }))}
-                                className="mt-1"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Days of week */}
-                          <div>
-                            <Label className="text-sm font-medium mb-3 block">
-                              Which days of the week do you want to apply changes to?
-                            </Label>
-                            <div className="flex flex-wrap gap-2">
-                              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-                                <div key={day} className="flex items-center space-x-2">
-                                  <Checkbox
-                                    id={`day-${day}`}
-                                    checked={bulkEditData.daysOfWeek.includes(day)}
-                                    onCheckedChange={() => handleDayOfWeekToggle(day)}
-                                  />
-                                  <Label htmlFor={`day-${day}`} className="text-sm">{day}</Label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Room Type Tabs */}
-                          <div className="border-b border-border">
-                            <div className="flex space-x-6">
-                              <button className="pb-2 text-sm font-medium text-primary border-b-2 border-primary">
-                                {getCurrentRoomType()?.name || "Superior"}
-                              </button>
-                              <button className="pb-2 text-sm font-medium text-muted-foreground">
-                                Multiple room types
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Collapsible sections */}
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                              <div className="text-left">
-                                <h4 className="text-lg font-semibold">Rooms to sell</h4>
-                                <p className="text-sm text-muted-foreground">Update the number of rooms to sell for this room type</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-4 space-y-4">
-                              <div className="flex gap-2">
-                                <Input
-                                  placeholder="Number of rooms"
-                                  value={bulkEditData.roomsToSell}
-                                  onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
-                                  className="flex-1"
-                                />
-                                <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground border">
-                                  Room(s)
-                                </div>
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
-                              </p>
-                              <div className="flex gap-2">
-                                <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
-                                <Button variant="outline" size="sm" onClick={() => setBulkEditOpen(false)}>Cancel</Button>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                              <div className="text-left">
-                                <h4 className="text-lg font-semibold">Prices</h4>
-                                <p className="text-sm text-muted-foreground">Edit the prices of any rate plans for this room</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-4 space-y-4">
-                              <div className="flex gap-2">
-                                <Select value={bulkEditData.rateType} onValueChange={(value) => setBulkEditData(prev => ({ ...prev, rateType: value }))}>
-                                  <SelectTrigger className="flex-1">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="Standard Rate">Standard Rate</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground border">
-                                  THB
-                                </div>
-                              </div>
-                              <Input
-                                type="number"
-                                placeholder="Price"
-                                value={bulkEditData.price}
-                                onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
-                              />
-                              <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
-                              </p>
-                              <div className="flex gap-2">
-                                <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
-                                <Button variant="outline" size="sm" onClick={() => setBulkEditOpen(false)}>Cancel</Button>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                              <div className="text-left">
-                                <h4 className="text-lg font-semibold">Room status</h4>
-                                <p className="text-sm text-muted-foreground">Open or close this room</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-4 space-y-4">
-                              <RadioGroup value={bulkEditData.roomStatus} onValueChange={(value) => setBulkEditData(prev => ({ ...prev, roomStatus: value }))}>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="open" id="open-room" />
-                                  <Label htmlFor="open-room">Open room</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="close" id="close-room" />
-                                  <Label htmlFor="close-room">Close room</Label>
-                                </div>
-                              </RadioGroup>
-                              <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
-                              </p>
-                              <div className="flex gap-2">
-                                <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
-                                <Button variant="outline" size="sm" onClick={() => setBulkEditOpen(false)}>Cancel</Button>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-
-                          <Collapsible>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-muted/50 rounded-lg">
-                              <div className="text-left">
-                                <h4 className="text-lg font-semibold">Restrictions</h4>
-                                <p className="text-sm text-muted-foreground">Edit, add or remove restrictions for any rate plan for this room</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </CollapsibleTrigger>
-                            <CollapsibleContent className="mt-4 space-y-4">
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a rate plan" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="standard">Standard Rate</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Button variant="link" size="sm" className="text-primary p-0">
-                                <span className="mr-1">+</span> Add more
-                              </Button>
-                              <p className="text-xs text-muted-foreground">
-                                Changes will be made to the date range: {formatDateStringRange(bulkEditData.fromDate, bulkEditData.toDate)}
-                              </p>
-                              <div className="flex gap-2">
-                                <Button size="sm" onClick={handleBulkEditSave}>Save changes</Button>
-                                <Button variant="outline" size="sm" onClick={() => setBulkEditOpen(false)}>Cancel</Button>
-                              </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        </div>
-                      </SheetContent>
-                    </Sheet>
-                  </div>
+        <div className="flex">
+          {/* Fixed Left Sidebar */}
+          <div className="w-[220px] flex-shrink-0 bg-background z-10">
+            {/* Header spacer */}
+            <div className="h-[72px] border-b"></div>
+            
+            {/* Room Type Labels */}
+            {roomTypes.map((roomType) => (
+              <div key={roomType.id} className="space-y-0">
+                <div className="h-12 flex items-center px-4 text-sm font-medium border-b border-border bg-muted/50">
+                  {roomType.name}
                 </div>
-
-                {/* Room Status Row */}
-                <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
-                    <span className="text-xs font-medium">Room status</span>
-                  </div>
-                  <div className="h-12 relative">
-                    {/* Render segments */}
-                    {createDateSegments(roomType.id, calendarDates).map((segment, segmentIndex) => {
-                      const cellWidth = 100 / 31; // Each cell is 1/31 of the width
-                      const leftPercent = (segment.startIndex / 31) * 100;
-                      const widthPercent = ((segment.endIndex - segment.startIndex + 1) / 31) * 100;
-                      
-                       if (segment.type === 'open') {
-                        return (
-                          <div 
-                            key={`segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-green-500 text-white rounded-full flex items-center justify-start pl-3 z-30 pointer-events-none"
-                            style={{
-                              left: `calc(${leftPercent}% + 8px)`,
-                              width: `calc(${widthPercent}% - 16px)`,
-                            }}
-                          >
-                            <span className="text-xs font-medium truncate pr-2">Bookable</span>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
-                    
-                    {/* Closed date segment bubbles */}
-                    {createDateSegments(roomType.id, calendarDates).map((segment, segmentIndex) => {
-                      const leftPercent = (segment.startIndex / 31) * 100;
-                      const widthPercent = ((segment.endIndex - segment.startIndex + 1) / 31) * 100;
-                      
-                      if (segment.type === 'closed') {
-                        return (
-                          <div 
-                            key={`closed-segment-${segmentIndex}`}
-                            className="absolute top-3 bottom-3 bg-red-500 text-white rounded-full flex items-center justify-start pl-3 z-30 pointer-events-none"
-                            style={{
-                              left: `calc(${leftPercent}% + 8px)`,
-                              width: `calc(${widthPercent}% - 16px)`,
-                            }}
-                          >
-                            <span className="text-xs font-medium truncate pr-2">Rate Closed</span>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })}
-                    
-                    {/* Clickable overlay cells */}
-                    <div className="grid grid-cols-31 h-full relative z-20">
-                      {calendarDates.map((date, index) => {
-                        const inDragRange = isInDragRange(index, roomType.id);
-                        const dayName = getDayName(date);
-                        const isSaturday = dayName === 'Sat';
-                        return (
-                          <div 
-                            key={`${roomType.id}-status-${index}`} 
-                            className={cn(
-                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
-                              inDragRange && "bg-blue-200",
-                              isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
-                            )}
-                            onMouseDown={() => handleMouseDown(roomType.id, index)}
-                            onMouseMove={() => handleMouseMove(index)}
-                            onMouseUp={handleMouseUp}
-                            onMouseEnter={() => handleMouseMove(index)}
-                          >
-                            {/* Interaction area only - bubbles are rendered as segments above */}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                <div className="h-8 flex items-center px-4 text-xs text-muted-foreground border-b border-border">
+                  Rooms to Sell
                 </div>
-
-                {/* Rooms to Sell Row */}
-                <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
-                    <span className="text-xs font-medium">Rooms to sell</span>
-                  </div>
-                  <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
-                      {calendarDates.map((date, index) => {
-                        const dataIndex = getDataIndexForDate(date);
-                        const isClosed = isDateClosed(roomType.id, date);
-                        const isEditing = editingCell?.roomTypeId === roomType.id && editingCell?.dateIndex === index && editingCell?.field === 'roomsToSell';
-                        const dayName = getDayName(date);
-                        const isSaturday = dayName === 'Sat';
-                        
-                        return (
-                          <div key={`${roomType.id}-rooms-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer relative",
-                            isClosed && "bg-red-200",
-                            isInDragRange(index, roomType.id) && "bg-blue-200",
-                            isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
-                          )}
-                            onMouseDown={() => handleMouseDown(roomType.id, index)}
-                            onMouseMove={() => handleMouseMove(index)}
-                            onMouseUp={handleMouseUp}
-                            onMouseEnter={() => handleMouseMove(index)}
-                          >
-                            {isEditing ? (
-                              <Input
-                                ref={inputRef}
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                onBlur={handleSaveEdit}
-                                onKeyDown={handleKeyDown}
-                                className="w-full h-8 text-center text-sm p-1 border-0 bg-white shadow-sm"
-                                type="number"
-                                min="0"
-                              />
-                            ) : (
-                              <span 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCellClick(roomType.id, index, 'roomsToSell');
-                                }}
-                              >
-                                {roomType.data.roomsToSell[dataIndex]}
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                <div className="h-8 flex items-center px-4 text-xs text-muted-foreground border-b border-border">
+                  Net Booked
                 </div>
-
-                {/* Net Booked Row */}
-                <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
-                    <span className="text-xs font-medium">Net booked</span>
-                  </div>
-                  <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
-                      {calendarDates.map((date, index) => {
-                        const dataIndex = getDataIndexForDate(date);
-                        const bookedCount = roomType.data.netBooked[dataIndex];
-                        const isClosed = isDateClosed(roomType.id, date);
-                        const dayName = getDayName(date);
-                        const isSaturday = dayName === 'Sat';
-                        return (
-                          <div key={`${roomType.id}-booked-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center relative",
-                            isClosed && "bg-red-200",
-                            isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
-                          )}>
-                            {bookedCount > 0 && (
-                              <div className="w-6 h-6 bg-gray-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
-                                {bookedCount}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Standard Rate Row */}
-                <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border last:border-b-0">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
-                    <span className="text-xs font-medium">Standard Rate</span>
-                  </div>
-                  <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
-                      {calendarDates.map((date, index) => {
-                        const dataIndex = getDataIndexForDate(date);
-                        const isClosed = isDateClosed(roomType.id, date);
-                        const isEditing = editingCell?.roomTypeId === roomType.id && editingCell?.dateIndex === index && editingCell?.field === 'rates';
-                        const dayName = getDayName(date);
-                        const isSaturday = dayName === 'Sat';
-                        
-                        return (
-                          <div key={`${roomType.id}-rate-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer relative",
-                            isClosed && "bg-red-200",
-                            isInDragRange(index, roomType.id) && "bg-blue-200",
-                            isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
-                          )}
-                            onMouseDown={() => handleMouseDown(roomType.id, index)}
-                            onMouseMove={() => handleMouseMove(index)}
-                            onMouseUp={handleMouseUp}
-                            onMouseEnter={() => handleMouseMove(index)}
-                          >
-                            {isEditing ? (
-                              <Input
-                                ref={inputRef}
-                                value={editValue}
-                                onChange={(e) => setEditValue(e.target.value)}
-                                onBlur={handleSaveEdit}
-                                onKeyDown={handleKeyDown}
-                                className="w-full h-8 text-center text-xs p-1 border-0 bg-white shadow-sm"
-                                type="number"
-                                min="0"
-                              />
-                            ) : (
-                              <div 
-                                className="text-center flex flex-col items-center justify-center h-full"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCellClick(roomType.id, index, 'rates');
-                                }}
-                              >
-                                <span className="text-[10px] text-muted-foreground -mb-px">THB</span>
-                                <span className="text-xs font-medium">{roomType.data.rates[dataIndex]}</span>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                <div className="h-8 flex items-center px-4 text-xs text-muted-foreground border-b border-border">
+                  Rate (INR)
                 </div>
               </div>
             ))}
           </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Simple Bulk Edit Dialog for Drag Selections */}
-      <Sheet open={simpleBulkEditOpen} onOpenChange={setSimpleBulkEditOpen}>
-        <SheetContent className="w-[400px] sm:w-[400px]">
-          <SheetHeader>
-            <SheetTitle className="sr-only">Bulk Edit</SheetTitle>
-          </SheetHeader>
-          
-          <div className="mt-6 space-y-6">
-            {/* Room Type Header */}
-            <div>
-              <h2 className="text-xl font-semibold">{getCurrentRoomType()?.name}</h2>
-              <p className="text-sm text-muted-foreground">Standard Rate</p>
-              {bulkEditSelection.startDate && bulkEditSelection.endDate && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {formatDateRange(bulkEditSelection.startDate, bulkEditSelection.endDate)}
-                </p>
-              )}
-              <Button variant="link" className="text-primary p-0 mt-2 text-sm">
-                Bulk edit
-              </Button>
-            </div>
+          {/* Scrollable Calendar Grid */}
+          <div 
+            ref={scrollContainerRef}
+            className="flex-1 overflow-x-auto overflow-y-hidden"
+            onScroll={handleScroll}
+          >
+            <div className="min-w-max">
+              {/* Month Headers */}
+              <div className="flex h-[72px] border-b">
+                {Object.entries(datesByMonth).map(([monthKey, dates]) => (
+                  <div key={monthKey} className="flex flex-col">
+                    <div className="h-8 flex items-center justify-center text-sm font-semibold bg-muted px-2 border-r border-border" style={{width: `${(dates as Date[]).length * 64}px`}}>
+                      {getMonthName((dates as Date[])[0])}
+                    </div>
+                    <div className="flex h-8">
+                      {(dates as Date[]).map((date, index) => (
+                        <div
+                          key={index}
+                          className="w-16 h-8 flex items-center justify-center text-xs font-medium text-foreground border-r border-border"
+                        >
+                          {getDateNumber(date)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-            {/* Room Status */}
-            <div className="space-y-3">
-              <RadioGroup 
-                value={bulkEditData.roomStatus} 
-                onValueChange={(value) => setBulkEditData(prev => ({ ...prev, roomStatus: value }))}
-                className="flex gap-6"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="open" id="bulk-open" />
-                  <Label htmlFor="bulk-open" className="text-sm font-medium">Open</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="close" id="bulk-close" />
-                  <Label htmlFor="bulk-close" className="text-sm font-medium">Close</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* Price */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Price</Label>
-              <div className="flex gap-2">
-                <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground border">
-                  THB
-                </div>
-                <Input
-                  type="number"
-                  placeholder="3750"
-                  value={bulkEditData.price}
-                  onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
-                  className="flex-1"
-                />
+              {/* Calendar Rows */}
+              <div className="space-y-0">
+                {roomTypes.map((roomType) => (
+                  <div key={roomType.id} className="space-y-0">
+                    {/* Room Type Header */}
+                    <div className="h-12 flex border-b border-border bg-muted/50">
+                      <div className="flex">
+                        {calendarDates.map((date, dateIndex) => {
+                          const isClosed = isDateClosed(roomType.id, date);
+                          const isInRange = isInDragRange(dateIndex, roomType.id);
+                          
+                          return (
+                            <div
+                              key={dateIndex}
+                              className={cn(
+                                "w-16 h-12 border-r border-border flex items-center justify-center cursor-pointer",
+                                isClosed ? "bg-red-100" : "bg-background hover:bg-muted/30",
+                                isInRange && "bg-primary/20"
+                              )}
+                              onMouseDown={() => handleMouseDown(roomType.id, dateIndex)}
+                              onMouseMove={() => handleMouseMove(dateIndex)}
+                              onMouseUp={handleMouseUp}
+                            >
+                              {isClosed && (
+                                <X className="h-3 w-3 text-red-600" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* Rooms to Sell Row */}
+                    <div className="h-8 border-b border-border">
+                      <div className="flex">
+                        {calendarDates.map((date, dateIndex) => {
+                          const dataIndex = getDataIndexForDate(date);
+                          const roomsToSell = roomType.data.roomsToSell[dataIndex];
+                          const isClosed = isDateClosed(roomType.id, date);
+                          const isEditing = editingCell?.roomTypeId === roomType.id && 
+                                          editingCell?.dateIndex === dateIndex && 
+                                          editingCell?.field === 'roomsToSell';
+                          const isInRange = isInDragRange(dateIndex, roomType.id);
+                          
+                          return (
+                            <div
+                              key={dateIndex}
+                              className={cn(
+                                "w-16 h-8 border-r border-border flex items-center justify-center text-xs cursor-pointer relative",
+                                isClosed ? "bg-red-100 text-red-800" : "bg-background hover:bg-muted/50",
+                                isInRange && "bg-primary/20"
+                              )}
+                              onClick={() => !isDragging && handleCellClick(roomType.id, dateIndex, 'roomsToSell')}
+                            >
+                              {isEditing ? (
+                                <Input
+                                  ref={inputRef}
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  onKeyDown={handleKeyDown}
+                                  onBlur={handleSaveEdit}
+                                  className="h-6 w-12 text-xs p-1 text-center border-0 bg-transparent"
+                                />
+                              ) : (
+                                <span className={cn(isClosed && "line-through")}>
+                                  {roomsToSell}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* Net Booked Row */}
+                    <div className="h-8 border-b border-border">
+                      <div className="flex">
+                        {calendarDates.map((date, dateIndex) => {
+                          const dataIndex = getDataIndexForDate(date);
+                          const netBooked = roomType.data.netBooked[dataIndex];
+                          const isClosed = isDateClosed(roomType.id, date);
+                          
+                          return (
+                            <div
+                              key={dateIndex}
+                              className={cn(
+                                "w-16 h-8 border-r border-border flex items-center justify-center text-xs",
+                                isClosed ? "bg-red-100 text-red-800" : "bg-background"
+                              )}
+                            >
+                              <span className={cn(isClosed && "line-through")}>
+                                {netBooked}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* Rates Row */}
+                    <div className="h-8 border-b border-border">
+                      <div className="flex">
+                        {calendarDates.map((date, dateIndex) => {
+                          const dataIndex = getDataIndexForDate(date);
+                          const rate = roomType.data.rates[dataIndex];
+                          const isClosed = isDateClosed(roomType.id, date);
+                          const isEditing = editingCell?.roomTypeId === roomType.id && 
+                                          editingCell?.dateIndex === dateIndex && 
+                                          editingCell?.field === 'rates';
+                          
+                          return (
+                            <div
+                              key={dateIndex}
+                              className={cn(
+                                "w-16 h-8 border-r border-border flex items-center justify-center text-xs cursor-pointer",
+                                isClosed ? "bg-red-100 text-red-800" : "bg-background hover:bg-muted/50"
+                              )}
+                              onClick={() => handleCellClick(roomType.id, dateIndex, 'rates')}
+                            >
+                              {isEditing ? (
+                                <Input
+                                  ref={inputRef}
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  onKeyDown={handleKeyDown}
+                                  onBlur={handleSaveEdit}
+                                  className="h-6 w-12 text-xs p-1 text-center border-0 bg-transparent"
+                                />
+                              ) : (
+                                <span className={cn(isClosed && "line-through")}>
+                                  {rate}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* Rooms to sell */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Rooms to sell</Label>
-              <Input
-                type="number"
-                placeholder="Number of rooms"
-                value={bulkEditData.roomsToSell}
-                onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
-              <Button onClick={handleBulkEditSave} className="flex-1">
-                Save
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setSimpleBulkEditOpen(false);
-                  setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
-                  setBulkEditData(prev => ({ ...prev, roomsToSell: "", price: "" }));
-                }}
-                className="flex-1 text-primary border-primary"
-              >
-                Cancel
-              </Button>
-            </div>
           </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+
+        {/* Comprehensive Bulk Edit Dialog */}
+        <Sheet open={bulkEditOpen} onOpenChange={setBulkEditOpen}>
+          <SheetContent className="w-[500px] sm:w-[500px] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Bulk edit</SheetTitle>
+            </SheetHeader>
+            
+            <div className="mt-6 space-y-6">
+              {/* Room Type Selection */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Room Type</Label>
+                <Select value={selectedRoomType} onValueChange={setSelectedRoomType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roomTypes.map((roomType) => (
+                      <SelectItem key={roomType.id} value={roomType.id}>
+                        {roomType.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Date Range */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">From Date</Label>
+                  <Input
+                    type="date"
+                    value={bulkEditData.fromDate}
+                    onChange={(e) => setBulkEditData(prev => ({ ...prev, fromDate: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">To Date</Label>
+                  <Input
+                    type="date"
+                    value={bulkEditData.toDate}
+                    onChange={(e) => setBulkEditData(prev => ({ ...prev, toDate: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              {/* Days of Week */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Days of the Week</Label>
+                <div className="flex flex-wrap gap-2">
+                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+                    <div key={day} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`day-${day}`}
+                        checked={bulkEditData.daysOfWeek.includes(day)}
+                        onCheckedChange={() => handleDayOfWeekToggle(day)}
+                      />
+                      <Label htmlFor={`day-${day}`} className="text-sm">{day}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Room Status */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Room Status</Label>
+                <RadioGroup 
+                  value={bulkEditData.roomStatus} 
+                  onValueChange={(value) => setBulkEditData(prev => ({ ...prev, roomStatus: value }))}
+                  className="flex gap-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="open" id="open" />
+                    <Label htmlFor="open" className="text-sm">Open</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="close" id="close" />
+                    <Label htmlFor="close" className="text-sm">Close</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Rooms to Sell */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Rooms to sell</Label>
+                <Input
+                  type="number"
+                  placeholder="Number of rooms"
+                  value={bulkEditData.roomsToSell}
+                  onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
+                />
+              </div>
+
+              {/* Rate Type */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Rate Type</Label>
+                <Select value={bulkEditData.rateType} onValueChange={(value) => setBulkEditData(prev => ({ ...prev, rateType: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Standard Rate">Standard Rate</SelectItem>
+                    <SelectItem value="Promo Rate">Promo Rate</SelectItem>
+                    <SelectItem value="Weekend Rate">Weekend Rate</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Price */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Price</Label>
+                <div className="flex gap-2">
+                  <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground border">
+                    THB
+                  </div>
+                  <Input
+                    type="number"
+                    placeholder="3750"
+                    value={bulkEditData.price}
+                    onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <Button onClick={handleBulkEditSave} className="flex-1">
+                  Save
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setBulkEditOpen(false)}
+                  className="flex-1 text-primary border-primary"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        {/* Simple Bulk Edit Dialog for Drag Selections */}
+        <Sheet open={simpleBulkEditOpen} onOpenChange={setSimpleBulkEditOpen}>
+          <SheetContent className="w-[400px] sm:w-[400px]">
+            <SheetHeader>
+              <SheetTitle className="sr-only">Bulk Edit</SheetTitle>
+            </SheetHeader>
+            
+            <div className="mt-6 space-y-6">
+              {/* Room Type Header */}
+              <div>
+                <h2 className="text-xl font-semibold">{getCurrentRoomType()?.name}</h2>
+                <p className="text-sm text-muted-foreground">Standard Rate</p>
+                {bulkEditSelection.startDate && bulkEditSelection.endDate && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {formatDateRange(bulkEditSelection.startDate, bulkEditSelection.endDate)}
+                  </p>
+                )}
+                <Button variant="link" className="text-primary p-0 mt-2 text-sm">
+                  Bulk edit
+                </Button>
+              </div>
+
+              {/* Room Status */}
+              <div className="space-y-3">
+                <RadioGroup 
+                  value={bulkEditData.roomStatus} 
+                  onValueChange={(value) => setBulkEditData(prev => ({ ...prev, roomStatus: value }))}
+                  className="flex gap-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="open" id="bulk-open" />
+                    <Label htmlFor="bulk-open" className="text-sm font-medium">Open</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="close" id="bulk-close" />
+                    <Label htmlFor="bulk-close" className="text-sm font-medium">Close</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Price */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Price</Label>
+                <div className="flex gap-2">
+                  <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground border">
+                    THB
+                  </div>
+                  <Input
+                    type="number"
+                    placeholder="3750"
+                    value={bulkEditData.price}
+                    onChange={(e) => setBulkEditData(prev => ({ ...prev, price: e.target.value }))}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+
+              {/* Rooms to sell */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Rooms to sell</Label>
+                <Input
+                  type="number"
+                  placeholder="Number of rooms"
+                  value={bulkEditData.roomsToSell}
+                  onChange={(e) => setBulkEditData(prev => ({ ...prev, roomsToSell: e.target.value }))}
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <Button onClick={handleBulkEditSave} className="flex-1">
+                  Save
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setSimpleBulkEditOpen(false);
+                    setBulkEditSelection({ startDate: null, endDate: null, roomTypeId: null });
+                    setBulkEditData(prev => ({ ...prev, roomsToSell: "", price: "" }));
+                  }}
+                  className="flex-1 text-primary border-primary"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
     </div>
   );
 };
