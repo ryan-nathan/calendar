@@ -478,8 +478,8 @@ const Calendar = () => {
         </div>
 
         {/* Calendar Grid - Horizontal Scroll Container */}
-        <div className="overflow-hidden">
-          <div className="min-w-auto">
+        <div className="overflow-x-auto">
+          <div className="min-w-[1800px]">
           {/* Month Headers */}
           <div className="grid grid-cols-[220px_1fr] mb-4">
             <div></div>
@@ -510,15 +510,15 @@ const Calendar = () => {
 
           {/* Calendar Header - Days and Dates */}
           <div className="grid grid-cols-[220px_1fr] border border-calendar-grid-border rounded-t-lg overflow-hidden">
-            <div className="bg-muted/50 border-r border-calendar-grid-border"></div>
+            <div className="bg-muted/50 border-r border-calendar-grid-border sticky left-0 z-10"></div>
             <div className="bg-muted/50">
-              <div className="grid grid-cols-31 h-full">
+              <div className="grid gap-0" style={{gridTemplateColumns: 'repeat(31, minmax(64px, 1fr))'}}>
                 {calendarDates.map((date, index) => {
                   const dayName = getDayName(date);
                   const isSaturday = dayName === 'Sat';
                   return (
                     <div key={index} className={cn(
-                      "border-r border-calendar-grid-border last:border-r-0",
+                      "border-r border-calendar-grid-border last:border-r-0 min-w-[64px]",
                       isSaturday && "border-r-2 border-r-blue-500"
                     )}>
                       <div className="p-1 text-center">
@@ -541,7 +541,7 @@ const Calendar = () => {
               )}>
                 {/* Room Type Header */}
                 <div className="grid grid-cols-[220px_1fr] bg-muted/30 border-b border-calendar-grid-border">
-                  <div className="p-3 border-r border-calendar-grid-border flex items-center">
+                  <div className="p-3 border-r border-calendar-grid-border flex items-center sticky left-0 z-10 bg-muted/30">
                     <h3 className="text-sm font-semibold truncate">{roomType.name}</h3>
                   </div>
                   <div className="p-3 flex justify-end">
@@ -564,7 +564,7 @@ const Calendar = () => {
                       }
                     }}>
                       <SheetTrigger asChild>
-                        <Button variant="default" size="sm">
+                        <Button variant="default" size="sm" className="sticky right-6 z-20">
                           Bulk edit
                         </Button>
                       </SheetTrigger>
@@ -764,7 +764,7 @@ const Calendar = () => {
 
                 {/* Room Status Row */}
                 <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
+                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border sticky left-0 z-10">
                     <span className="text-xs font-medium">Room status</span>
                   </div>
                   <div className="h-12 relative">
@@ -814,7 +814,7 @@ const Calendar = () => {
                     })}
                     
                     {/* Clickable overlay cells */}
-                    <div className="grid grid-cols-31 h-full relative z-20">
+                    <div className="grid gap-0 h-full relative z-20" style={{gridTemplateColumns: 'repeat(31, minmax(64px, 1fr))'}}>
                       {calendarDates.map((date, index) => {
                         const inDragRange = isInDragRange(index, roomType.id);
                         const dayName = getDayName(date);
@@ -823,7 +823,7 @@ const Calendar = () => {
                           <div 
                             key={`${roomType.id}-status-${index}`} 
                             className={cn(
-                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
+                              "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative min-w-[64px]",
                               inDragRange && "bg-blue-200",
                               isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                             )}
@@ -842,11 +842,11 @@ const Calendar = () => {
 
                 {/* Rooms to Sell Row */}
                 <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
+                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border sticky left-0 z-10">
                     <span className="text-xs font-medium">Rooms to sell</span>
                   </div>
                   <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
+                    <div className="grid gap-0 h-full" style={{gridTemplateColumns: 'repeat(31, minmax(64px, 1fr))'}}>
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
@@ -856,7 +856,7 @@ const Calendar = () => {
                         
                         return (
                           <div key={`${roomType.id}-rooms-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer relative",
+                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium hover:bg-calendar-cell-hover cursor-pointer relative min-w-[64px]",
                             isClosed && "bg-red-200",
                             isInDragRange(index, roomType.id) && "bg-blue-200",
                             isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
@@ -896,11 +896,11 @@ const Calendar = () => {
 
                 {/* Net Booked Row */}
                 <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
+                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border sticky left-0 z-10">
                     <span className="text-xs font-medium">Net booked</span>
                   </div>
                   <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
+                    <div className="grid gap-0 h-full" style={{gridTemplateColumns: 'repeat(31, minmax(64px, 1fr))'}}>
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const bookedCount = roomType.data.netBooked[dataIndex];
@@ -909,7 +909,7 @@ const Calendar = () => {
                         const isSaturday = dayName === 'Sat';
                         return (
                           <div key={`${roomType.id}-booked-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center relative",
+                            "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center relative min-w-[64px]",
                             isClosed && "bg-red-200",
                             isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
                           )}>
@@ -927,11 +927,11 @@ const Calendar = () => {
 
                 {/* Standard Rate Row */}
                 <div className="grid grid-cols-[220px_1fr] border-b border-calendar-grid-border last:border-b-0">
-                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border">
+                  <div className="p-3 bg-muted/30 border-r border-calendar-grid-border sticky left-0 z-10">
                     <span className="text-xs font-medium">Standard Rate</span>
                   </div>
                   <div className="h-12">
-                    <div className="grid grid-cols-31 h-full">
+                    <div className="grid gap-0 h-full" style={{gridTemplateColumns: 'repeat(31, minmax(64px, 1fr))'}}>
                       {calendarDates.map((date, index) => {
                         const dataIndex = getDataIndexForDate(date);
                         const isClosed = isDateClosed(roomType.id, date);
@@ -941,7 +941,7 @@ const Calendar = () => {
                         
                         return (
                           <div key={`${roomType.id}-rate-${index}`} className={cn(
-                            "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer relative",
+                            "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center hover:bg-calendar-cell-hover cursor-pointer relative min-w-[64px]",
                             isClosed && "bg-red-200",
                             isInDragRange(index, roomType.id) && "bg-blue-200",
                             isSaturday && "after:absolute after:inset-y-0 after:right-0 after:w-0.5 after:bg-blue-500 after:z-10"
