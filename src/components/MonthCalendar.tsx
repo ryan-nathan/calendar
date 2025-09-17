@@ -17,6 +17,11 @@ interface MonthCalendarProps {
   }>;
   baseDataDate: Date;
   onDateClick?: (date: Date) => void;
+  onMouseDown?: (month: number, year: number, day: number) => void;
+  onMouseMove?: (month: number, year: number, day: number) => void;
+  onMouseUp?: () => void;
+  isInDragRange?: (month: number, year: number, day: number) => boolean;
+  isDragging?: boolean;
 }
 
 export const MonthCalendar = ({ 
@@ -26,7 +31,12 @@ export const MonthCalendar = ({
   selectedRoomType,
   roomTypes,
   baseDataDate,
-  onDateClick 
+  onDateClick,
+  onMouseDown,
+  onMouseMove,
+  onMouseUp,
+  isInDragRange,
+  isDragging
 }: MonthCalendarProps) => {
   const monthNames = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -137,9 +147,13 @@ export const MonthCalendar = ({
                   date && getDateAvailabilityStatus(date) === 'closed' && "bg-red-200 text-red-900",
                   date && getDateAvailabilityStatus(date) === 'bookable' && "bg-green-200 text-green-900",
                   date && getDateAvailabilityStatus(date) === 'sold-out' && "bg-red-200 text-red-900",
+                  date && isInDragRange && isInDragRange(month, year, date.getDate()) && "bg-blue-200",
                   !date && "cursor-default bg-muted/10"
                 )}
-                onClick={() => date && onDateClick?.(date)}
+                onMouseDown={() => date && onMouseDown && onMouseDown(month, year, date.getDate())}
+                onMouseMove={() => date && onMouseMove && onMouseMove(month, year, date.getDate())}
+                onMouseUp={() => onMouseUp && onMouseUp()}
+                onMouseEnter={() => date && onMouseMove && onMouseMove(month, year, date.getDate())}
               >
                 {date ? date.getDate() : ''}
               </div>

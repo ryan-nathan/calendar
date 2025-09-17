@@ -19,6 +19,7 @@ interface YearlyViewProps {
   selectedRoomTypeFilter: string;
   baseDataDate: Date;
   onDateClick?: (date: Date) => void;
+  onToggleDateStatus?: (roomTypeId: string, date: Date) => void;
 }
 
 export const YearlyView = ({ 
@@ -26,10 +27,14 @@ export const YearlyView = ({
   closedDates, 
   selectedRoomTypeFilter,
   baseDataDate,
-  onDateClick 
+  onDateClick,
+  onToggleDateStatus 
 }: YearlyViewProps) => {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [dateFilter, setDateFilter] = useState("all-dates");
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{month: number, year: number, day: number} | null>(null);
+  const [dragEnd, setDragEnd] = useState<{month: number, year: number, day: number} | null>(null);
 
   const handlePreviousYear = () => {
     setCurrentYear(prev => prev - 1);
@@ -37,6 +42,73 @@ export const YearlyView = ({
 
   const handleNextYear = () => {
     setCurrentYear(prev => prev + 1);
+  };
+
+  const getDateKey = (date: Date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+  const toggleDateStatus = (roomTypeId: string, date: Date) => {
+    if (onToggleDateStatus) {
+      onToggleDateStatus(roomTypeId, date);
+    }
+  };
+
+  const handleMouseDown = (month: number, year: number, day: number) => {
+    // Prevent text selection during drag
+    document.body.style.userSelect = 'none';
+    setIsDragging(true);
+    setDragStart({ month, year, day });
+    setDragEnd({ month, year, day });
+  };
+
+  const handleMouseMove = (month: number, year: number, day: number) => {
+    if (isDragging && dragStart !== null) {
+      setDragEnd({ month, year, day });
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging && dragStart !== null && dragEnd !== null) {
+      // Convert drag coordinates to actual dates
+      const startDate = new Date(dragStart.year, dragStart.month, dragStart.day);
+      const endDate = new Date(dragEnd.year, dragEnd.month, dragEnd.day);
+      
+      // Ensure start is before end
+      const actualStart = startDate <= endDate ? startDate : endDate;
+      const actualEnd = startDate <= endDate ? endDate : startDate;
+      
+      // If it's a single click (same date)
+      if (startDate.getTime() === endDate.getTime()) {
+        toggleDateStatus(selectedRoomTypeFilter, startDate);
+      } else {
+        // Toggle all dates in range
+        const currentDate = new Date(actualStart);
+        while (currentDate <= actualEnd) {
+          toggleDateStatus(selectedRoomTypeFilter, new Date(currentDate));
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      }
+    }
+    
+    // Restore text selection and reset drag state
+    document.body.style.userSelect = '';
+    setIsDragging(false);
+    setDragStart(null);
+    setDragEnd(null);
+  };
+
+  const isInDragRange = (month: number, year: number, day: number) => {
+    if (!isDragging || !dragStart || !dragEnd) return false;
+    
+    const currentDate = new Date(year, month, day).getTime();
+    const startDate = new Date(dragStart.year, dragStart.month, dragStart.day).getTime();
+    const endDate = new Date(dragEnd.year, dragEnd.month, dragEnd.day).getTime();
+    
+    const actualStart = Math.min(startDate, endDate);
+    const actualEnd = Math.max(startDate, endDate);
+    
+    return currentDate >= actualStart && currentDate <= actualEnd;
   };
 
   // Generate 12 months for the current year
@@ -91,6 +163,11 @@ export const YearlyView = ({
             roomTypes={roomTypes}
             baseDataDate={baseDataDate}
             onDateClick={onDateClick}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            isInDragRange={isInDragRange}
+            isDragging={isDragging}
           />
         ))}
       </div>

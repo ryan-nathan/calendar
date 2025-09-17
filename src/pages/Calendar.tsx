@@ -564,6 +564,7 @@ const Calendar = () => {
               // Handle date click in yearly view - could open bulk edit or navigate
               console.log('Date clicked:', date);
             }}
+            onToggleDateStatus={toggleDateStatus}
           />
         ) : (
           <React.Fragment>
