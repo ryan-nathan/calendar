@@ -610,14 +610,14 @@ const Calendar = () => {
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder={currentView === "list-view" ? "All rooms" : "Select room type"} />
                 </SelectTrigger>
-                 <SelectContent>
-                   {currentView === "list-view" && (
-                     <SelectItem value="all-rooms" className="pl-3">All rooms</SelectItem>
-                   )}
-                   <SelectItem value="superior" className="pl-3">Superior Room</SelectItem>
-                   <SelectItem value="deluxe-balcony" className="pl-3">Deluxe Room with Balcony</SelectItem>
-                   <SelectItem value="deluxe-oasis" className="pl-3">Deluxe Oasis Ground Floor</SelectItem>
-                 </SelectContent>
+                <SelectContent>
+                  {currentView === "list-view" && (
+                    <SelectItem value="all-rooms">All rooms</SelectItem>
+                  )}
+                  <SelectItem value="superior">Superior Room</SelectItem>
+                  <SelectItem value="deluxe-balcony">Deluxe Room with Balcony</SelectItem>
+                  <SelectItem value="deluxe-oasis">Deluxe Oasis Ground Floor</SelectItem>
+                </SelectContent>
               </Select>
               
               <div className="px-3 py-2 bg-muted rounded-md text-sm">
