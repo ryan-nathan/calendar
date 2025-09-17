@@ -293,15 +293,29 @@ const Calendar = () => {
           const startDate = calendarDates[startIndex];
           const endDate = calendarDates[endIndex];
           
-          if (startDate && endDate) {
-            setBulkEditSelection({
-              startDate,
-              endDate,
-              roomTypeId: currentDragRoomType
-            });
-            setSelectedRoomType(currentDragRoomType);
-            setSimpleBulkEditOpen(true);
-          }
+        if (startDate && endDate) {
+          // Check the current status of the first selected date to pre-select radio button
+          const firstDateKey = getDateKey(startDate);
+          const isCurrentlyClosed = closedDates[currentDragRoomType]?.[firstDateKey] || false;
+          const currentStatus = isCurrentlyClosed ? 'close' : 'open';
+          
+          setBulkEditSelection({
+            startDate,
+            endDate,
+            roomTypeId: currentDragRoomType
+          });
+          setSelectedRoomType(currentDragRoomType);
+          
+          // Set the room status based on current state
+          setBulkEditData(prev => ({ 
+            ...prev, 
+            roomStatus: currentStatus,
+            roomsToSell: "",
+            price: ""
+          }));
+          
+          setSimpleBulkEditOpen(true);
+        }
         }
       }
     }
@@ -592,12 +606,26 @@ const Calendar = () => {
             }}
             onToggleDateStatus={toggleDateStatus}
             onOpenBulkEdit={(startDate, endDate, roomTypeId) => {
+              // Check the current status of the first selected date to pre-select radio button
+              const firstDateKey = getDateKey(startDate);
+              const isCurrentlyClosed = closedDates[roomTypeId]?.[firstDateKey] || false;
+              const currentStatus = isCurrentlyClosed ? 'close' : 'open';
+              
               setBulkEditSelection({
                 startDate,
                 endDate,
                 roomTypeId
               });
               setSelectedRoomType(roomTypeId);
+              
+              // Set the room status based on current state
+              setBulkEditData(prev => ({ 
+                ...prev, 
+                roomStatus: currentStatus,
+                roomsToSell: "",
+                price: ""
+              }));
+              
               setSimpleBulkEditOpen(true);
             }}
           />
