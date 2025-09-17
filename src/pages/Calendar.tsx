@@ -1409,14 +1409,12 @@ const Calendar = () => {
                             onMouseEnter={() => handleMouseMove(index)}
                           >
                             {/* Individual cell hover overlay */}
-                            {(isClosed || !isClosed) && (
-                              <div 
-                                className={cn(
-                                  "absolute inset-0 m-3 rounded-full transition-colors duration-200",
-                                  isClosed ? "hover:bg-red-400" : "hover:bg-green-400"
-                                )}
-                              />
-                            )}
+                            <div 
+                              className={cn(
+                                "absolute inset-0 transition-colors duration-200",
+                                isClosed ? "hover:bg-red-400" : "hover:bg-green-400"
+                              )}
+                            />
                           </div>
                         );
                       })}
