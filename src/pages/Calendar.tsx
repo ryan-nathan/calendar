@@ -72,7 +72,7 @@ const Calendar = () => {
     toDate: "2025-10-16",
     daysOfWeek: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     roomsToSell: "",
-    rateType: "Standard Rate 30% RB",
+    rateType: "Standard Rate",
     price: "",
     roomStatus: "open",
     restrictions: ""
@@ -658,7 +658,7 @@ const Calendar = () => {
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="Standard Rate 30% RB">Standard Rate 30% RB</SelectItem>
+                                    <SelectItem value="Standard Rate">Standard Rate</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground border">
