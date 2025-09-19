@@ -281,13 +281,114 @@ const Calendar = () => {
     setCurrentDragCellType(cellType);
   };
 
+  const handleTouchStart = (roomTypeId: string, dateIndex: number, cellType: 'status' | 'roomsToSell' | 'rates' = 'status') => {
+    // Prevent text selection during drag
+    document.body.style.userSelect = 'none';
+    setIsDragging(true);
+    setDragStart(dateIndex);
+    setDragEnd(dateIndex);
+    setCurrentDragRoomType(roomTypeId);
+    setCurrentDragCellType(cellType);
+  };
+
   const handleMouseMove = (dateIndex: number) => {
     if (isDragging && dragStart !== null) {
       setDragEnd(dateIndex);
     }
   };
 
+  const handleTouchMove = (e: React.TouchEvent, dateIndex: number) => {
+    if (isDragging && dragStart !== null) {
+      e.preventDefault(); // Prevent scrolling during drag
+      setDragEnd(dateIndex);
+      
+      // Handle touch move across different cells
+      const touch = e.touches[0];
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (elementBelow) {
+        const cellElement = elementBelow.closest('[data-date-index]');
+        if (cellElement) {
+          const newDateIndex = parseInt(cellElement.getAttribute('data-date-index') || '0');
+          setDragEnd(newDateIndex);
+        }
+      }
+    }
+  };
+
   const handleMouseUp = () => {
+    if (isDragging && dragStart !== null && dragEnd !== null && currentDragRoomType && currentDragCellType) {
+      const startIndex = Math.min(dragStart, dragEnd);
+      const endIndex = Math.max(dragStart, dragEnd);
+      
+      // If it's a single click (start and end are the same)
+      if (startIndex === endIndex) {
+        const date = calendarDates[startIndex];
+        if (date) {
+          if (currentDragCellType === 'status') {
+            // Toggle date status for status cells
+            toggleDateStatus(currentDragRoomType, date);
+          } else if (currentDragCellType === 'roomsToSell' || currentDragCellType === 'rates') {
+            // Open inline edit for rates/rooms cells
+            handleCellClick(currentDragRoomType, startIndex, currentDragCellType);
+          }
+        }
+      } else {
+        // For status cells, immediately toggle all dates in the range without opening sidebar
+        if (currentDragCellType === 'status') {
+          const startDate = calendarDates[startIndex];
+          const endDate = calendarDates[endIndex];
+          
+          if (startDate && endDate) {
+            // Toggle all dates in range
+            for (let i = startIndex; i <= endIndex; i++) {
+              const date = calendarDates[i];
+              if (date) {
+                toggleDateStatus(currentDragRoomType, date);
+              }
+            }
+          }
+        } else {
+          // For drag selection of rates/rooms cells, open simple bulk edit dialog
+          const startDate = calendarDates[startIndex];
+          const endDate = calendarDates[endIndex];
+          
+        if (startDate && endDate) {
+          // Check the current status of the first selected date to pre-select radio button
+          const firstDateKey = getDateKey(startDate);
+          const isCurrentlyClosed = closedDates[currentDragRoomType]?.[firstDateKey] || false;
+          const currentStatus = isCurrentlyClosed ? 'close' : 'open';
+          
+          setBulkEditSelection({
+            startDate,
+            endDate,
+            roomTypeId: currentDragRoomType
+          });
+          setSelectedRoomType(currentDragRoomType);
+          
+          // Set the room status based on current state
+          setBulkEditData(prev => ({ 
+            ...prev, 
+            roomStatus: currentStatus,
+            roomsToSell: "",
+            price: ""
+          }));
+          
+          setSimpleBulkEditOpen(true);
+        }
+        }
+      }
+    }
+    
+    // Restore text selection
+    document.body.style.userSelect = '';
+    setIsDragging(false);
+    setDragStart(null);
+    setDragEnd(null);
+    setCurrentDragRoomType(null);
+    setCurrentDragCellType(null);
+  };
+
+  const handleTouchEnd = () => {
     if (isDragging && dragStart !== null && dragEnd !== null && currentDragRoomType && currentDragCellType) {
       const startIndex = Math.min(dragStart, dragEnd);
       const endIndex = Math.max(dragStart, dragEnd);
@@ -1397,18 +1498,22 @@ const Calendar = () => {
                          const isSaturday = dayName === 'Sat';
                          return (
                            <div 
-                             key={`${roomType.id}-status-${index}`} 
-                             className={cn(
-                               "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
-                               isClosed && "bg-red-200",
-                               inDragRange && "bg-blue-200",
-                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
-                             )}
-                            onMouseDown={() => handleMouseDown(roomType.id, index, 'status')}
-                            onMouseMove={() => handleMouseMove(index)}
-                            onMouseUp={handleMouseUp}
-                            onMouseEnter={() => handleMouseMove(index)}
-                          >
+                              key={`${roomType.id}-status-${index}`} 
+                              className={cn(
+                                "border-r border-calendar-grid-border last:border-r-0 cursor-pointer flex items-center justify-center relative",
+                                isClosed && "bg-red-200",
+                                inDragRange && "bg-blue-200",
+                                isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
+                              )}
+                             data-date-index={index}
+                             onMouseDown={() => handleMouseDown(roomType.id, index, 'status')}
+                             onMouseMove={() => handleMouseMove(index)}
+                             onMouseUp={handleMouseUp}
+                             onMouseEnter={() => handleMouseMove(index)}
+                             onTouchStart={() => handleTouchStart(roomType.id, index, 'status')}
+                             onTouchMove={(e) => handleTouchMove(e, index)}
+                             onTouchEnd={handleTouchEnd}
+                           >
                             {/* Interaction area only - bubbles are rendered as segments above */}
                           </div>
                         );
@@ -1433,20 +1538,27 @@ const Calendar = () => {
                         
                         return (
                            <div key={`${roomType.id}-rooms-${index}`} className={cn(
-                             "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium cursor-pointer relative",
-                             !isDragging && "hover:bg-calendar-cell-hover",
-                             isClosed && "bg-red-200",
-                              isInMultiCellDragRange(index, roomType.id, 'roomsToSell') && "bg-blue-200",
-                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
-                           )}
-                             onMouseDown={(e) => {
-                               e.stopPropagation();
-                               handleMouseDown(roomType.id, index, 'roomsToSell');
-                             }}
-                             onMouseMove={() => handleMouseMove(index)}
-                             onMouseUp={handleMouseUp}
-                             onMouseEnter={() => handleMouseMove(index)}
-                            >
+                              "border-r border-calendar-grid-border last:border-r-0 flex items-center justify-center text-sm font-medium cursor-pointer relative",
+                              !isDragging && "hover:bg-calendar-cell-hover",
+                              isClosed && "bg-red-200",
+                               isInMultiCellDragRange(index, roomType.id, 'roomsToSell') && "bg-blue-200",
+                               isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
+                            )}
+                              data-date-index={index}
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                handleMouseDown(roomType.id, index, 'roomsToSell');
+                              }}
+                              onMouseMove={() => handleMouseMove(index)}
+                              onMouseUp={handleMouseUp}
+                              onMouseEnter={() => handleMouseMove(index)}
+                              onTouchStart={(e) => {
+                                e.stopPropagation();
+                                handleTouchStart(roomType.id, index, 'roomsToSell');
+                              }}
+                              onTouchMove={(e) => handleTouchMove(e, index)}
+                              onTouchEnd={handleTouchEnd}
+                             >
                              {isEditing ? (
                               <Input
                                 ref={inputRef}
@@ -1517,20 +1629,27 @@ const Calendar = () => {
                         
                         return (
                            <div key={`${roomType.id}-rate-${index}`} className={cn(
-                             "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center cursor-pointer relative",
-                             !isDragging && "hover:bg-calendar-cell-hover",
-                             isClosed && "bg-red-200",
-                             isInMultiCellDragRange(index, roomType.id, 'rates') && "bg-blue-200",
-                             isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
-                           )}
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                handleMouseDown(roomType.id, index, 'rates');
-                              }}
-                              onMouseMove={() => handleMouseMove(index)}
-                              onMouseUp={handleMouseUp}
-                              onMouseEnter={() => handleMouseMove(index)}
-                            >
+                              "border-r border-calendar-grid-border last:border-r-0 flex flex-col items-center justify-center cursor-pointer relative",
+                              !isDragging && "hover:bg-calendar-cell-hover",
+                              isClosed && "bg-red-200",
+                              isInMultiCellDragRange(index, roomType.id, 'rates') && "bg-blue-200",
+                              isSaturday && "after:absolute after:inset-y-0 after:-right-px after:w-0.5 after:bg-blue-500 after:z-10"
+                            )}
+                               data-date-index={index}
+                               onMouseDown={(e) => {
+                                 e.stopPropagation();
+                                 handleMouseDown(roomType.id, index, 'rates');
+                               }}
+                               onMouseMove={() => handleMouseMove(index)}
+                               onMouseUp={handleMouseUp}
+                               onMouseEnter={() => handleMouseMove(index)}
+                               onTouchStart={(e) => {
+                                 e.stopPropagation();
+                                 handleTouchStart(roomType.id, index, 'rates');
+                               }}
+                               onTouchMove={(e) => handleTouchMove(e, index)}
+                               onTouchEnd={handleTouchEnd}
+                             >
                             {isEditing ? (
                               <Input
                                 ref={inputRef}
