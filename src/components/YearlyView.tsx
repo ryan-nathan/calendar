@@ -64,13 +64,65 @@ export const YearlyView = ({
     setDragEnd({ month, year, day });
   };
 
+  const handleTouchStart = (month: number, year: number, day: number) => {
+    // Prevent text selection during drag
+    document.body.style.userSelect = 'none';
+    setIsDragging(true);
+    setDragStart({ month, year, day });
+    setDragEnd({ month, year, day });
+  };
+
   const handleMouseMove = (month: number, year: number, day: number) => {
     if (isDragging && dragStart !== null) {
       setDragEnd({ month, year, day });
     }
   };
 
+  const handleTouchMove = (e: React.TouchEvent, month: number, year: number, day: number) => {
+    if (isDragging && dragStart !== null) {
+      e.preventDefault(); // Prevent scrolling during drag
+      setDragEnd({ month, year, day });
+      
+      // Handle touch move across different cells
+      const touch = e.touches[0];
+      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (elementBelow) {
+        const cellElement = elementBelow.closest('[data-month-day]');
+        if (cellElement) {
+          const monthDay = cellElement.getAttribute('data-month-day');
+          if (monthDay) {
+            const [cellMonth, cellYear, cellDay] = monthDay.split('-').map(Number);
+            setDragEnd({ month: cellMonth, year: cellYear, day: cellDay });
+          }
+        }
+      }
+    }
+  };
+
   const handleMouseUp = () => {
+    if (isDragging && dragStart !== null && dragEnd !== null) {
+      // Convert drag coordinates to actual dates
+      const startDate = new Date(dragStart.year, dragStart.month, dragStart.day);
+      const endDate = new Date(dragEnd.year, dragEnd.month, dragEnd.day);
+      
+      // Ensure start is before end
+      const actualStart = startDate <= endDate ? startDate : endDate;
+      const actualEnd = startDate <= endDate ? endDate : startDate;
+      
+      // Both single click and drag selection open bulk edit sidebar
+      if (onOpenBulkEdit) {
+        onOpenBulkEdit(actualStart, actualEnd, selectedRoomTypeFilter);
+      }
+    }
+    
+    // Restore text selection and reset drag state
+    document.body.style.userSelect = '';
+    setIsDragging(false);
+    setDragStart(null);
+    setDragEnd(null);
+  };
+
+  const handleTouchEnd = () => {
     if (isDragging && dragStart !== null && dragEnd !== null) {
       // Convert drag coordinates to actual dates
       const startDate = new Date(dragStart.year, dragStart.month, dragStart.day);
@@ -161,6 +213,9 @@ export const YearlyView = ({
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             isInDragRange={isInDragRange}
             isDragging={isDragging}
             dateFilter={dateFilter}

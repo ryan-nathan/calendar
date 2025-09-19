@@ -20,6 +20,9 @@ interface MonthCalendarProps {
   onMouseDown?: (month: number, year: number, day: number) => void;
   onMouseMove?: (month: number, year: number, day: number) => void;
   onMouseUp?: () => void;
+  onTouchStart?: (month: number, year: number, day: number) => void;
+  onTouchMove?: (e: React.TouchEvent, month: number, year: number, day: number) => void;
+  onTouchEnd?: () => void;
   isInDragRange?: (month: number, year: number, day: number) => boolean;
   isDragging?: boolean;
   dateFilter?: string;
@@ -36,6 +39,9 @@ export const MonthCalendar = ({
   onMouseDown,
   onMouseMove,
   onMouseUp,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
   isInDragRange,
   isDragging,
   dateFilter = "all-dates"
@@ -163,10 +169,14 @@ export const MonthCalendar = ({
                   date && isInDragRange && isInDragRange(month, year, date.getDate()) && "bg-blue-200",
                   !date && "cursor-default bg-muted/10"
                 )}
+                data-month-day={date ? `${month}-${year}-${date.getDate()}` : undefined}
                 onMouseDown={() => date && onMouseDown && onMouseDown(month, year, date.getDate())}
                 onMouseMove={() => date && onMouseMove && onMouseMove(month, year, date.getDate())}
                 onMouseUp={() => onMouseUp && onMouseUp()}
                 onMouseEnter={() => date && onMouseMove && onMouseMove(month, year, date.getDate())}
+                onTouchStart={() => date && onTouchStart && onTouchStart(month, year, date.getDate())}
+                onTouchMove={(e) => date && onTouchMove && onTouchMove(e, month, year, date.getDate())}
+                onTouchEnd={() => onTouchEnd && onTouchEnd()}
                 onClick={() => {
                   if (date && onDateClick && !isDragging) {
                     console.log('MonthCalendar: Date clicked', date);
